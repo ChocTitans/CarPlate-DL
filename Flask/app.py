@@ -52,7 +52,7 @@ def ficheliste():
         session_db.close()
 
         if user:
-            return render_template('crud.html')
+            return render_template('liste-fiche.html')
     return render_template('index.html')
 
 @app.route('/add-fiche-button')
