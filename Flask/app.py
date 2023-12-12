@@ -5,11 +5,13 @@ from flask import Flask, request
 from config import DATABASE_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import os
 
 app = Flask(__name__)
 app.secret_key = "yoursecretkey"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
+UPLOAD_FOLDER = 'uploads'
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
@@ -48,5 +50,37 @@ def location():
             return render_template('location.html')
     else:
         return redirect(url_for('home'))
+
+@app.route('/video')
+def video():
+    if 'user_id' in session:
+        # Fetch user details using session information
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('upload.html')
+    else:
+        return redirect(url_for('home'))
+
+@app.route('/upload_video', methods=['GET', 'POST'])
+def upload_video():
+    if request.method == 'POST':
+        if 'user_id' in session:  # Check if user is logged in
+            if not os.path.exists(UPLOAD_FOLDER):
+                os.makedirs(UPLOAD_FOLDER)
+            video = request.files['video']
+            video_path = f"uploads/{video.filename}"  # Define the path to save the uploaded video
+            video.save(video_path)
+
+            return "Video uploaded and processed successfully"  # Or redirect to a result page
+
+        else:
+            return redirect(url_for('home'))  # Redirect to home/login page if user is not logged in
+
+    return render_template('upload.html')  # Render the upload form
+
 if __name__ == '__main__':
     app.run(debug=True)

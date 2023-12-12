@@ -6,7 +6,6 @@ from config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 Base.metadata.create_all(engine)
-
 Session = sessionmaker(bind=engine)
 session = Session()
 

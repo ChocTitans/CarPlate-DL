@@ -13,3 +13,11 @@ class User(Base):
         self.email = email 
         self.password = password
     
+class Video(Base):
+    __tablename__ = 'videos'
+    id = Column(Integer, primary_key=True)
+    path = Column(String)
+
+    def __init__(self, id, path):
+        self.id = id
+        self.path = path
