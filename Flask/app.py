@@ -55,6 +55,10 @@ def ficheliste():
             return render_template('crud.html')
     return render_template('index.html')
 
+@app.route('/add-fiche-button')
+def addfichebutton():
+    return render_template('index.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
