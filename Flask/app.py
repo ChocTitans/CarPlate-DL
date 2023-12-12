@@ -17,13 +17,47 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 @app.route('/')
-def home():
+def index():
+    if 'user_id' in session:
+        # Fetch user details using session information
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('location.html')
     return render_template('index.html')
 
+@app.route('/add-fiche')
+def addfiche():
+    if 'user_id' in session:
+        # Fetch user details using session information
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('add-fiche.html')
+    return render_template('index.html')
+
+@app.route('/fiche-liste')
+def ficheliste():
+    if 'user_id' in session:
+        # Fetch user details using session information
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('crud.html')
+    return render_template('index.html')
 
 @app.route('/login', methods=['POST'])
 def login():
- if request.method == 'POST':
+    if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
 
@@ -35,7 +69,7 @@ def login():
             session['user_id'] = user.id
             return redirect(url_for('location'))  # Redirect to dashboard or any other page after login
         else:
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
     
 @app.route('/location')
 def location():
@@ -49,7 +83,7 @@ def location():
         if user:
             return render_template('location.html')
     else:
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
 
 @app.route('/video')
 def video():
@@ -63,7 +97,21 @@ def video():
         if user:
             return render_template('upload.html')
     else:
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' in session:
+        # Fetch user details using session information
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('dashboard.html')
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/upload_video', methods=['GET', 'POST'])
 def upload_video():
@@ -78,7 +126,7 @@ def upload_video():
             return "Video uploaded and processed successfully"  # Or redirect to a result page
 
         else:
-            return redirect(url_for('home'))  # Redirect to home/login page if user is not logged in
+            return redirect(url_for('index'))  # Redirect to index/login page if user is not logged in
 
     return render_template('upload.html')  # Render the upload form
 
