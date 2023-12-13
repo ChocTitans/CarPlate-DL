@@ -20,35 +20,37 @@
               data-v0-t="card"
             >
               <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                <h3 class="tracking-tight text-sm font-medium">New Case Form</h3>
+                <h3 class="tracking-tight text-sm font-medium">Nouvelle Fiche</h3>
               </div>
               <div class="p-6">
-                <form class="space-y-4">
+                <form action="/submit-form" class="space-y-4" method="POST">
                   <label class="block">
-                    <span class="text-gray-700">Fiche ID</span>
+                    <span class="text-gray-700">Nom Fiche</span>
                     <input
                       aria-label="Case ID"
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                       type="text"
-                      placeholder="Fiche De Recherche ID"
+                      placeholder="Nom de cette fiche"
+                      name="nom_fiche"
                     />
                   </label>
                   <label class="block">
                     <span class="text-gray-700">Person</span>
-                    <input
-                      aria-label="Person"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                      type="text"
-                    />
-                  </label>
-                  <label class="block">
+                    <select id="selectPeople" name="selectedPerson" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
+                        {% for person in people %}
+                            <option value="{{ person.cin }}">{{ person.first_name }} {{ person.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                
+                <label class="block">
                     <span class="text-gray-700">Vehicle</span>
-                    <input
-                      aria-label="Vehicle"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                      type="text"
-                    />
-                  </label>
+                    <select id="selectVehicles" name="selectedVehicle" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
+                        {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.car_plate }}">{{ vehicle.model }} - {{ vehicle.car_plate }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
                   <label class="block">
                     <span class="text-gray-700">Address</span>
                     <input
@@ -56,6 +58,7 @@
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                       type="text"
                       placeholder="Adresse dernière fois vu"
+                      name="address"
                     />
                   </label>
                   <label class="block">
@@ -64,6 +67,7 @@
                       aria-label="Description"
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                       placeholder="Description de ce qui s'est passé"
+                      name="description"
 
                     ></textarea>
                   </label>
@@ -81,4 +85,5 @@
         </footer>
       </div>
     </body>
+
 </html>

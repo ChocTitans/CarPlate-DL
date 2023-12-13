@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, session, redirect
 from flask_sqlalchemy import SQLAlchemy
-from models import User
+from models import User, Person, PoliceBrigader, PoliceTonSite, Vehicle, FichierDeRecherche
 from flask import Flask, request
 from config import DATABASE_URL
 from sqlalchemy import create_engine
@@ -12,6 +12,8 @@ app.secret_key = "yoursecretkey"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 UPLOAD_FOLDER = 'uploads'
+people_data = None
+vehicles_data = None
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
@@ -29,6 +31,22 @@ def index():
             return render_template('location.html')
     return render_template('index.html')
 
+def load_people():
+    global people_data
+    if people_data is None:
+        session_db = Session()
+        people_data = session_db.query(Person).all()
+        session_db.close()
+    return people_data
+
+def load_vehicles():
+    global vehicles_data
+    if vehicles_data is None:
+        session_db = Session()
+        vehicles_data = session_db.query(Vehicle).all()
+        session_db.close()
+    return vehicles_data
+
 @app.route('/add-fiche')
 def addfiche():
     if 'user_id' in session:
@@ -36,11 +54,15 @@ def addfiche():
         session_db = Session()
         user_id = session['user_id']
         user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
 
         if user:
-            return render_template('add-fiche.html')
+            # Fetch data for dropdowns
+            people = load_people()
+            vehicles = load_vehicles()
+            return render_template('add-fiche.html', people=people, vehicles=vehicles)
+    
     return render_template('index.html')
+
 
 @app.route('/fiche-liste')
 def ficheliste():
@@ -134,5 +156,38 @@ def upload_video():
 
     return render_template('upload.html')  # Render the upload form
 
-if __name__ == '__main__':
-    app.run(debug=True)
+## CRUD ADD FICHE
+
+@app.route('/submit-form', methods=['POST'])
+def submit_form():
+    if request.method == 'POST':
+        # Retrieve form data
+        nom_fiche = request.form['nom_fiche']
+        selected_person_id = request.form['selectedPerson']
+        selected_vehicle_id = request.form['selectedVehicle']
+        last_seen_address = request.form['address']
+        description = request.form['description']
+
+        # Create a new FichierDeRecherche instance
+        new_fiche = FichierDeRecherche(name=nom_fiche, address=last_seen_address, description=description)
+
+        # Fetch the Person and Vehicle based on selected IDs
+        with Session() as session_db:
+            selected_person = session_db.query(Person).filter_by(cin=selected_person_id).first()
+            selected_vehicle = session_db.query(Vehicle).filter_by(car_plate=selected_vehicle_id).first()
+
+            # Associate Person and Vehicle with the new FichierDeRecherche
+            if selected_person:
+                new_fiche.person = selected_person
+            if selected_vehicle:
+                new_fiche.vehicle = selected_vehicle
+
+            # Add the new FichierDeRecherche to the session and commit changes
+            session_db.add(new_fiche)
+            session_db.commit()
+
+        # Redirect to a success page or return a success message
+        return "Form submitted successfully!"
+
+    # Handle other HTTP methods or errors here
+    return "Invalid request method"

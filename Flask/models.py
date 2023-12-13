@@ -47,41 +47,31 @@ class PoliceTonSite(User):
         self.site_code = site_code
 
 
-person_fichier_association = Table('person_fichier_association', Base.metadata,
-    Column('person_id', Integer, ForeignKey('persons.id')),
-    Column('fichier_id', Integer, ForeignKey('fichiers_de_recherche.id'))
-)
-
-# Define association table for Vehicle and FichierDeRecherche
-vehicle_fichier_association = Table('vehicle_fichier_association', Base.metadata,
-    Column('vehicle_id', Integer, ForeignKey('vehicles.id')),
-    Column('fichier_id', Integer, ForeignKey('fichiers_de_recherche.id'))
-)
-
 class Person(Base):
     __tablename__ = 'persons'
-    id = Column(Integer, primary_key=True)
+    cin = Column(String, primary_key=True)
     first_name = Column(String)
     last_name = Column(String)
     dob = Column(Date)
     address = Column(String)
-    # Other attributes of a person
 
-    fichiers = relationship("FichierDeRecherche", secondary=person_fichier_association, back_populates="persons")
+    fichiers = relationship("FichierDeRecherche", back_populates="person")
 
 class Vehicle(Base):
     __tablename__ = 'vehicles'
-    id = Column(Integer, primary_key=True)
+    car_plate = Column(String, primary_key=True)
     model = Column(String)
-    car_plate = Column(String)
-    # Other attributes of a vehicle
 
-    fichiers = relationship("FichierDeRecherche", secondary=vehicle_fichier_association, back_populates="vehicles")
+    fichiers = relationship("FichierDeRecherche", back_populates="vehicle")
+
 class FichierDeRecherche(Base):
     __tablename__ = 'fichiers_de_recherche'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    # Other attributes of a search file
+    address = Column(String)
+    description = Column(String)
+    person_cin = Column(String, ForeignKey('persons.cin'))
+    vehicle_car_plate = Column(String, ForeignKey('vehicles.car_plate'))
 
-    persons = relationship("Person", secondary=person_fichier_association, back_populates="fichiers")
-    vehicles = relationship("Vehicle", secondary=vehicle_fichier_association, back_populates="fichiers")
+    person = relationship("Person", back_populates="fichiers")
+    vehicle = relationship("Vehicle", back_populates="fichiers")

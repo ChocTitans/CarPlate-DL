@@ -1,7 +1,10 @@
 # init_db.py
+from datetime import date
+
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import User, Base, PoliceBrigader, PoliceTonSite
+from models import User, Base, PoliceBrigader, PoliceTonSite,Person, Vehicle
 from config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
@@ -24,8 +27,15 @@ ton_site_password = 'sitepass'
 ton_site_code = 'TON123'
 
 ton_site_user = PoliceTonSite(email=ton_site_email, password=ton_site_password, site_code=ton_site_code)
-session.add(ton_site_user)
 
+Personne = Person(cin='AA88520',first_name='Hamza', last_name='Boubnane', dob=date(1990, 1, 1), address='Address Details')
+Vehicule = Vehicle(model='BMW 2022', car_plate='LA-AAXV')
+
+# Add instances to the session and commit to the database
+session.add(Personne)
+session.add(Vehicule)
+session.add(brigader_user)
+session.add(ton_site_user)
 session.commit()
 
 print("Database initialized successfully.")
