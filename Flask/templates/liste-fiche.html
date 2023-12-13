@@ -31,29 +31,45 @@
                     <thead class="[&amp;_tr]:border-b">
                       <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Item ID
+                          ID
                         </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Nom du fiche
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Person CIN
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Matricule
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Addresse
+                        </th>             
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                           Description
-                        </th>
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Actions
-                        </th>
+                        </th>                                     
                       </tr>
                     </thead>
                     <tbody class="[&amp;_tr:last-child]:border-0">
+                      {% for fichier in fichiers %}
                       <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">#78901</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">Item 1</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.id }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.name }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.person_cin }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.vehicle_car_plate }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.address  }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fichier.description  }}</td>
+
                         <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
                           <button class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-blue-500 text-white rounded-md px-2 py-1">
                             Edit
                           </button>
-                          <button class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-red-500 text-white rounded-md px-2 py-1 ml-2">
+                            <a href="{{ url_for('deletefiche', fichier_id=fichier.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-red-500 text-white rounded-md px-2 py-1 ml-2">
                             Delete
                           </button>
                         </td>
                       </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
                 </div>
@@ -62,9 +78,8 @@
           </div>
           <div class="grid gap-4 lg:grid-cols-2"></div>
         </main>
-        <footer class="h-16 border-t border-gray-700 bg-black text-white flex items-center justify-center">
-          <p class="text-center">© 2023 Police Department. All rights reserved.</p>
-        </footer>
+        {% include 'footer.html' %}
+
       </div>
 </body>
 

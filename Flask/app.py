@@ -71,10 +71,10 @@ def ficheliste():
         session_db = Session()
         user_id = session['user_id']
         user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
+        fichiers = session_db.query(FichierDeRecherche).all()
 
-        if user:
-            return render_template('liste-fiche.html')
+        if fichiers or user:
+            return render_template('liste-fiche.html', fichiers=fichiers)
     return render_template('index.html')
 
 @app.route('/add-fiche-button')
@@ -168,26 +168,29 @@ def submit_form():
         last_seen_address = request.form['address']
         description = request.form['description']
 
-        # Create a new FichierDeRecherche instance
         new_fiche = FichierDeRecherche(name=nom_fiche, address=last_seen_address, description=description)
 
-        # Fetch the Person and Vehicle based on selected IDs
         with Session() as session_db:
             selected_person = session_db.query(Person).filter_by(cin=selected_person_id).first()
             selected_vehicle = session_db.query(Vehicle).filter_by(car_plate=selected_vehicle_id).first()
 
-            # Associate Person and Vehicle with the new FichierDeRecherche
             if selected_person:
                 new_fiche.person = selected_person
             if selected_vehicle:
                 new_fiche.vehicle = selected_vehicle
 
-            # Add the new FichierDeRecherche to the session and commit changes
             session_db.add(new_fiche)
             session_db.commit()
 
-        # Redirect to a success page or return a success message
-        return "Form submitted successfully!"
+        return redirect(url_for('ficheliste'))
 
-    # Handle other HTTP methods or errors here
     return "Invalid request method"
+    
+@app.route('/delete-fiche/<int:fichier_id>', methods=['GET', 'POST'])
+def deletefiche(fichier_id):
+    session_db = Session()
+    fichier = session_db.query(FichierDeRecherche).get(fichier_id)
+    if fichier:
+        session_db.delete(fichier)
+        session_db.commit()
+    return redirect(url_for('ficheliste'))
