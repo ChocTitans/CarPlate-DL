@@ -194,3 +194,22 @@ def deletefiche(fichier_id):
         session_db.delete(fichier)
         session_db.commit()
     return redirect(url_for('ficheliste'))
+
+
+@app.route('/edit-fiche/<int:fichier_id>', methods=['GET', 'POST'])
+def editfiche(fichier_id):
+    session_db = Session()
+    fichier = session_db.query(FichierDeRecherche).get(fichier_id)
+
+    if request.method == 'POST':
+        fichier.name = request.form['nom_fiche']
+        fichier.address = request.form['address']
+        fichier.person_cin = request.form['selectedPerson']
+        fichier.vehicle_car_plate = request.form['selectedVehicle']
+        fichier.description = request.form['description']
+
+        session_db.commit()
+
+        return redirect(url_for('ficheliste'))
+
+    return render_template('edit-fiche.html', fichier=fichier)
