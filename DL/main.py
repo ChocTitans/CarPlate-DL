@@ -16,7 +16,7 @@ coco_model = YOLO('yolov8n.pt')
 license_plate_detector = YOLO('./best.pt')
 
 # load video
-cap = cv2.VideoCapture('./test.mp4')
+cap = cv2.VideoCapture('./sample1.mp4')
 
 vehicles = [2, 3, 5, 7]
 
@@ -27,7 +27,7 @@ while ret:
     frame_nmr += 1
     ret, frame = cap.read()
     if ret:
-        if frame_nmr > 300: # 100 = 3 secs
+        if frame_nmr > 25: # 100 = 3 secs
             break
         results[frame_nmr] = {}
         # detect vehicles
