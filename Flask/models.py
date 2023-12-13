@@ -9,7 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String)
     password = Column(String)
-    type = Column(String)  # This column helps determine the type of user
+    type = Column(String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'user',
@@ -17,27 +17,16 @@ class User(Base):
     }
 
     def __init__(self, email, password):
-        self.email = email 
+        self.email = email
         self.password = password
-
-class PoliceBrigader(User):
-    __tablename__ = 'police_brigaders'
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    badge_number = Column(Integer)
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'police_brigader',
-    }
-
-    def __init__(self, email, password, badge_number):
-        super().__init__(email, password)
-        self.badge_number = badge_number
 
 class PoliceTonSite(User):
     __tablename__ = 'police_ton_sites'
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     site_code = Column(String)
-    
+
+    location_history = relationship("LocationHistory", back_populates="police_ton_site")
+
     __mapper_args__ = {
         'polymorphic_identity': 'police_ton_site',
     }
@@ -46,7 +35,33 @@ class PoliceTonSite(User):
         super().__init__(email, password)
         self.site_code = site_code
 
+class PoliceBrigader(User):
+    __tablename__ = 'police_brigaders'
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    badge_number = Column(Integer)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'police_brigader',
+    }
+
+    def __init__(self, email, password, badge_number):
+        super().__init__(email, password)
+        self.badge_number = badge_number
+
+class LocationHistory(Base):
+    __tablename__ = 'location_history'
+    id = Column(Integer, primary_key=True)
+    police_ton_site_id = Column(Integer, ForeignKey('police_ton_sites.id'))
+    latitude = Column(String)
+    longitude = Column(String)
+
+    police_ton_site = relationship("PoliceTonSite", back_populates="location_history")
+
+    def __init__(self, police_ton_site_id, latitude, longitude):
+        self.police_ton_site_id = police_ton_site_id
+        self.latitude = latitude
+        self.longitude = longitude
+        
 class Person(Base):
     __tablename__ = 'persons'
     cin = Column(String, primary_key=True)
