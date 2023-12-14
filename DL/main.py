@@ -7,6 +7,8 @@ import time
 from sort.sort import Sort
 from util import get_car, read_license_plate, write_csv
 
+from ../Flask/config import DATABASE_URL
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         video_filename = sys.argv[1]  # Get the video filename from command line argument
@@ -27,7 +29,7 @@ if __name__ == '__main__':
         frame_nmr = -1
         ret = True
         while ret:
-            frame_nmr += 1
+            frame_nmr += 30
             ret, frame = cap.read()
             if ret:
                 if frame_nmr > 25:  # 100 = 3 secs
@@ -62,6 +64,8 @@ if __name__ == '__main__':
 
                         # read license plate number
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
+                        new_vehicle = Vehicle(car_plate=license_plate_text, model=f"Score: {license_plate_text_score}")
+
                         if license_plate_text is not None:
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
                                                           'license_plate': {'bbox': [x1, y1, x2, y2],

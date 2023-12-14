@@ -174,10 +174,11 @@ def dashboard():
 @app.route('/run_detection', methods=['POST'])
 def run_detection():
     if request.method == 'POST':
-        video_filename = request.form['video_filename']  # Get the video filename
-        process = subprocess.Popen(['python', '../DL/main.py', video_filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        print(process.communicate())
+        # video_filename = request.form['video_filename']  # Get the video filename
+        # process = subprocess.Popen(['python', '../DL/main.py', video_filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # stdout, stderr = process.communicate()
+        # print(process.communicate())
+        
         
         if stderr:
             return f'Error: {stderr.decode("utf-8")}'
