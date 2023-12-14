@@ -6,6 +6,7 @@ from config import DATABASE_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = "yoursecretkey"
@@ -170,6 +171,22 @@ def dashboard():
     else:
         return redirect(url_for('index'))
 
+@app.route('/run_detection', methods=['POST'])
+def run_detection():
+    if request.method == 'POST':
+        video_filename = request.form['video_filename']  # Get the video filename
+        process = subprocess.Popen(['python', '../DL/main.py', video_filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        print(process.communicate())
+        
+        if stderr:
+            return f'Error: {stderr.decode("utf-8")}'
+        else:
+            return f'Success: {stdout.decode("utf-8")}'
+    else:
+        return 'Method Not Allowed'
+
+
 @app.route('/upload_video', methods=['GET', 'POST'])
 def upload_video():
     if request.method == 'POST':
@@ -179,9 +196,6 @@ def upload_video():
             video = request.files['video']
             video_path = f"uploads/{video.filename}"  # Define the path to save the uploaded video
             video.save(video_path)
-
-            return "Video uploaded and processed successfully"  # Or redirect to a result page
-
         else:
             return redirect(url_for('index'))  # Redirect to index/login page if user is not logged in
 
