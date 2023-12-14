@@ -7,14 +7,12 @@ import time
 from sort.sort import Sort
 from util import get_car, read_license_plate, write_csv
 
-from ../Flask/config import DATABASE_URL
-
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         video_filename = sys.argv[1]  # Get the video filename from command line argument
 
         # Construct the video file path using the received filename
-        video_path = f'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\Flask\\\\uploads\\\\test.mp4'
+        video_path = f'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\Flask\\\\uploads\\\\{video_filename}'
         cap = cv2.VideoCapture(video_path)
 
         results = {}
@@ -29,7 +27,7 @@ if __name__ == '__main__':
         frame_nmr = -1
         ret = True
         while ret:
-            frame_nmr += 30
+            frame_nmr += 1
             ret, frame = cap.read()
             if ret:
                 if frame_nmr > 25:  # 100 = 3 secs
@@ -64,7 +62,6 @@ if __name__ == '__main__':
 
                         # read license plate number
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
-                        new_vehicle = Vehicle(car_plate=license_plate_text, model=f"Score: {license_plate_text_score}")
 
                         if license_plate_text is not None:
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
@@ -75,7 +72,7 @@ if __name__ == '__main__':
 
         # write results
         print("Writing in the csv")
-        write_csv(results, './test.csv')
+        write_csv(results, 'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\DL\\\\test.csv')
         time.sleep(3)
         print("Executing the add_missing_data scripts")
         subprocess.run(['python', 'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\DL\\\\add_missing_data.py'])
@@ -83,6 +80,6 @@ if __name__ == '__main__':
 
         print("Executing the visualize scripts")
         # Execute the second script
-        subprocess.run(['python', 'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\DL\\\\visualize.py'])
+        subprocess.Popen(['python', 'E:\\\\Project\\\\AI-Carplatev3\\\\yolownew\\\\DL\\\\visualize.py', video_filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
         print("Please provide the video filename as a command line argument")
