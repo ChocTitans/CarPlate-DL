@@ -48,20 +48,23 @@ class PoliceBrigader(User):
     def __init__(self, email, password, badge_number):
         super().__init__(email, password)
         self.badge_number = badge_number
-
+        
 class LocationHistory(db.Model):
     __tablename__ = 'location_history'
     id = db.Column(db.Integer, primary_key=True)
     police_ton_site_id = db.Column(db.Integer, db.ForeignKey('police_ton_sites.id'))
     latitude = db.Column(db.String)
     longitude = db.Column(db.String)
+    street_name = db.Column(db.String)  # New column for street name
 
     police_ton_site = db.relationship("PoliceTonSite", back_populates="location_history")
 
-    def __init__(self, police_ton_site_id, latitude, longitude):
+    def __init__(self, police_ton_site_id, latitude, longitude, street_name):
         self.police_ton_site_id = police_ton_site_id
         self.latitude = latitude
         self.longitude = longitude
+        self.street_name = street_name
+
 
 class Person(db.Model):
     __tablename__ = 'persons'
@@ -77,6 +80,7 @@ class Vehicle(db.Model):
     __tablename__ = 'vehicles'
     car_plate = db.Column(db.String, primary_key=True)
     model = db.Column(db.String)
+    localisation = db.Column(db.String)
 
     fichiers = db.relationship("FichierDeRecherche", back_populates="vehicle")
 

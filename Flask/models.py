@@ -54,13 +54,16 @@ class LocationHistory(Base):
     police_ton_site_id = Column(Integer, ForeignKey('police_ton_sites.id'))
     latitude = Column(String)
     longitude = Column(String)
+    street_name = Column(String)
 
     police_ton_site = relationship("PoliceTonSite", back_populates="location_history")
 
-    def __init__(self, police_ton_site_id, latitude, longitude):
+    def __init__(self, police_ton_site_id, latitude, longitude, street_name):
         self.police_ton_site_id = police_ton_site_id
         self.latitude = latitude
         self.longitude = longitude
+        self.street_name = street_name
+
         
 class Person(Base):
     __tablename__ = 'persons'
@@ -76,7 +79,7 @@ class Vehicle(Base):
     __tablename__ = 'vehicles'
     car_plate = Column(String, primary_key=True)
     model = Column(String)
-
+    localisation = Column(String)
     fichiers = relationship("FichierDeRecherche", back_populates="vehicle")
 
 class FichierDeRecherche(Base):

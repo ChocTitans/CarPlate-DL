@@ -5,8 +5,7 @@ from flask import Flask, request
 from config import DATABASE_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
-import subprocess
+import requests
 
 app = Flask(__name__)
 app.secret_key = "yoursecretkey"
@@ -108,7 +107,41 @@ def logout():
     
     # Redirect to the index or login page after logout
     return redirect(url_for('index'))
-   
+
+@app.route('/location', methods=['GET'])
+def location():
+    dl_app_url = 'http://localhost:5050'
+    dl_location_endpoint = f'{dl_app_url}/location'
+
+    requests.get(dl_location_endpoint)
+    return redirect(dl_location_endpoint)
+
+        
+@app.route('/save-location')
+def savelocation():
+    dl_app_url = 'http://localhost:5050'
+    dl_location_endpoint = f'{dl_app_url}/save-location'
+
+    requests.get(dl_location_endpoint)
+    return redirect(dl_location_endpoint)
+
+@app.route('/run_detection')
+def rundetection():
+    dl_app_url = 'http://localhost:5050'
+    dl_location_endpoint = f'{dl_app_url}/run_detection'
+
+    requests.get(dl_location_endpoint)
+    return redirect(dl_location_endpoint)
+
+@app.route('/upload_video')
+def uploadvideo():
+    dl_app_url = 'http://localhost:5050'
+    dl_location_endpoint = f'{dl_app_url}/upload_video'
+
+    requests.get(dl_location_endpoint)
+    return redirect(dl_location_endpoint)
+
+
 def video():
     if 'user_id' in session:
         # Fetch user details using session information

@@ -11,6 +11,12 @@
         <header class="p-4 flex justify-between items-center">
           <div>
             <h1 class="text-2xl font-bold">Police Department</h1>
+            {% if location_history %}
+                <p class="text-lg" >Location: {{ location_history.street_name }}</p>
+            {% else %}
+                <p class="text-lg" >No location history found.</p>
+            {% endif %}
+
           </div>
           <div>
             <span
@@ -46,20 +52,34 @@
           </div>
           <div class="rounded-lg border shadow-sm mt-4 bg-white text-black" data-v0-t="card">
             <div class="flex flex-col space-y-1.5 p-6">
-              <h2 class="text-xl font-bold">Matricule Detected</h2>
+                <h2 class="text-xl font-bold">Matricule Detected</h2>
             </div>
             <div class="p-6">
-              <div class="divide-y divide-gray-200">
-                <div class="grid grid-cols-4">
-                  <div>ID</div>
-                  <div>Matricule</div>
-                  <div>Localisation</div>
-                  <div>Status</div>
+                <div class="divide-y divide-gray-200">
+                    <div class="grid grid-cols-4">
+                        <div>ID</div>
+                        <div>Matricule</div>
+                        <div>Localisation</div>
+                        <div>Status</div>
+                    </div>
+                    <br>
+                    <!-- Iterate through matricules and display each one -->
+                    {% for vehicle in vehicles %}
+                    <div class="grid grid-cols-4">
+                        <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
+                        <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
+                        <div>Av. Mohamed Ben Abdellah Erregragui</div> <!-- Display localisation -->
+                        <div class="inline-flex items-center">
+                          <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
+                              No recherché
+                          </span>
+                      </div>
+                      </div>
+                    {% endfor %}
                 </div>
-
-              </div>
             </div>
-          </div>
+        </div>
+        
           <div class="mt-4">
           </div>
           {% include 'footer.html' %}
