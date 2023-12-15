@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+    <!-- Include Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+</head>
+<div class="flex flex-col w-full sticky top-0 z-50 bg-black text-white">
+    <header class="flex items-center h-16 px-4 border-b border-gray-700">
+      <nav class="flex items-center gap-6 text-lg font-medium">
+        <a class="flex items-center gap-2 text-lg font-semibold" href="#">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-6 h-6 text-gray-400"
+          >
+            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path>
+          </svg>
+          <span class="sr-only">Police Department</span>
+        </a>
+        <a class="font-bold" href="{{ url_for('dashboard') }}">
+          Accueil
+        </a>
+        <a class="text-gray-500" href="{{ url_for('ficheliste') }}">
+          Fiches
+        </a>
+        <a class="text-gray-500" href="#">
+          Policiers
+        </a>
+      </nav>
+      <div class="flex items-center ml-auto gap-4">
+        <button class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-full">
+          <img
+            alt="Avatar"
+            class="rounded-full"
+            height="32"
+            src="/placeholder.svg"
+            width="32"
+            style="aspect-ratio: 32 / 32; object-fit: cover;"
+          />
+          <span class="sr-only">User profile</span>
+        </button>
+      </div>
+    </header>  
+</div>

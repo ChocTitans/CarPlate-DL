@@ -78,10 +78,6 @@ def ficheliste():
             return render_template('liste-fiche.html', fichiers=fichiers)
     return render_template('index.html')
 
-@app.route('/add-fiche-button')
-def addfichebutton():
-    return render_template('index.html')
-
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -113,37 +109,6 @@ def logout():
     # Redirect to the index or login page after logout
     return redirect(url_for('index'))
    
-@app.route('/location')
-def location():
-    if 'user_id' in session:
-        # Fetch user details using session information
-        session_db = Session()
-        user_id = session['user_id']
-        user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
-
-        if user:
-            return render_template('location.html')
-    else:
-        return redirect(url_for('index'))
-
-@app.route('/save-location', methods=['POST'])
-def save_location():
-    data = request.json
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-
-    session_db = Session()
-    police_ton_site_id = session.get('police_ton_site_id')
-
-    if police_ton_site_id:
-        location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude)
-        session_db.add(location_entry)
-        session_db.commit()
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'message': 'User not found'})
-
 def video():
     if 'user_id' in session:
         # Fetch user details using session information
@@ -171,29 +136,6 @@ def dashboard():
     else:
         return redirect(url_for('index'))
 
-@app.route('/run_detection', methods=['POST'])
-def run_detection():
-    if request.method == 'POST':
-        video_filename = request.form['video_filename']  # Get the video filename
-        subprocess.Popen(['python', '../DL/main.py', video_filename])
-
-    else:
-        return 'Method Not Allowed'
-
-
-@app.route('/upload_video', methods=['GET', 'POST'])
-def upload_video():
-    if request.method == 'POST':
-        if 'user_id' in session:  # Check if user is logged in
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.makedirs(UPLOAD_FOLDER)
-            video = request.files['video']
-            video_path = f"uploads/{video.filename}"  # Define the path to save the uploaded video
-            video.save(video_path)
-        else:
-            return redirect(url_for('index'))  # Redirect to index/login page if user is not logged in
-
-    return render_template('upload.html')  # Render the upload form
 
 ## CRUD ADD FICHE
 

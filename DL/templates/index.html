@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+    <!-- Include Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+</head>
+    
+<body>
+    <div class="w-full min-h-screen flex items-center justify-center" style="background-color: #303131;">
+        <div class="w-full max-w-sm mx-auto">
+          <div class="rounded-lg border border-black shadow-sm text-white" data-v0-t="card" style="background-color: #303131;">
+            <div class="flex flex-col space-y-1.5 p-4">
+              <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full mx-auto mb-4">
+                <img
+                  class="aspect-square h-full w-full"
+                  alt="User Avatar"
+                  src="/placeholder.svg?height=100&amp;width=100"
+                />
+                <span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-gray-200">U</span>
+              </span>
+              <h2 class="text-2xl font-bold text-center">Login</h2>
+            </div>
+            <div class="p-6 space-y-6">
+              <form action="{{ url_for('login') }}" method="POST">
+
+              <div class="space-y-4">
+                <div>
+                  <label
+                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-200"
+                    for="email"
+                  >
+                    Email
+                  </label>
+                  <input
+                    class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-gray-200 text-black"
+                    id="email"
+                    name="email"
+                    placeholder="m@example.com"
+                    required=""
+                    type="email"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-200"
+                    for="password"
+                  >
+                    Password
+                  </label>
+                  <input
+                    class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-gray-200 text-black"
+                    id="password"
+                    required=""
+                    type="password"
+                    name="password"
+                  />
+                </div>
+              
+                <a class="text-blue-400 hover:underline text-sm" href="#">
+                  Forgot your password?
+                </a>
+              </div>
+              <br>
+              <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full bg-black hover:bg-gray-700 text-white">
+                Login
+              </button>
+            </form>
+              <div class="text-center text-sm mt-4 text-gray-200">
+                Don't have an account?
+                <a class="text-blue-400 hover:underline ml-1" href="#">
+                  Sign up
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</body>
+</html>
