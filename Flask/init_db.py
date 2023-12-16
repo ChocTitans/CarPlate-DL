@@ -29,11 +29,9 @@ ton_site_code = 'TON123'
 ton_site_user = PoliceTonSite(email=ton_site_email, password=ton_site_password, site_code=ton_site_code)
 
 Personne = Person(cin='AA88520',first_name='Hamza', last_name='Boubnane', dob=date(1990, 1, 1), address='Address Details')
-Vehicule = Vehicle(model='BMW 2022', car_plate='H-644-LX')
 
 # Add instances to the session and commit to the database
 session.add(Personne)
-session.add(Vehicule)
 session.add(brigader_user)
 session.add(ton_site_user)
 session.commit()

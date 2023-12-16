@@ -56,22 +56,24 @@
             </div>
             <div class="p-6">
                 <div class="divide-y divide-gray-200">
-                    <div class="grid grid-cols-4">
+                    <div class="grid grid-cols-5">
                         <div>ID</div>
                         <div>Matricule</div>
                         <div>Localisation</div>
+                        <div>Date / Time</div>
                         <div>Status</div>
                     </div>
                     <br>
                     <!-- Iterate through matricules and display each one -->
                     {% for vehicle in vehicles %}
-                    <div class="grid grid-cols-4">
+                    <div class="grid grid-cols-5">
                         <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
                         <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
-                        <div>Av. Mohamed Ben Abdellah Erregragui</div> <!-- Display localisation -->
+                        <div>{{ vehicle.localisation }}</div> <!-- Display localisation -->
+                        <div>{{ vehicle.recorded_at }}</div> 
                         <div class="inline-flex items-center">
                           <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
-                              No recherché
+                            {{ vehicle.Status }}
                           </span>
                       </div>
                       </div>

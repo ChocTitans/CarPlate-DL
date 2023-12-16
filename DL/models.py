@@ -3,7 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from DL.config import db
 from flask_sqlalchemy import SQLAlchemy
-from DL.config import db
+from datetime import datetime
+from sqlalchemy import DateTime
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -56,15 +57,16 @@ class LocationHistory(db.Model):
     latitude = db.Column(db.String)
     longitude = db.Column(db.String)
     street_name = db.Column(db.String)  # New column for street name
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # Column for recording time
 
     police_ton_site = db.relationship("PoliceTonSite", back_populates="location_history")
 
-    def __init__(self, police_ton_site_id, latitude, longitude, street_name):
+    def __init__(self, police_ton_site_id, latitude, longitude, street_name, recorded_at):
         self.police_ton_site_id = police_ton_site_id
         self.latitude = latitude
         self.longitude = longitude
         self.street_name = street_name
-
+        recorded_at = recorded_at
 
 class Person(db.Model):
     __tablename__ = 'persons'
@@ -81,6 +83,8 @@ class Vehicle(db.Model):
     car_plate = db.Column(db.String, primary_key=True)
     model = db.Column(db.String)
     localisation = db.Column(db.String)
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # Column for recording time
+    Status = db.Column(db.String)
 
     fichiers = db.relationship("FichierDeRecherche", back_populates="vehicle")
 

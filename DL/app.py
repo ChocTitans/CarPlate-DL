@@ -2,10 +2,13 @@ from flask import Flask, render_template, request, url_for, session, redirect, j
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import current_app
-from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory
+from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche
 from DL.config import DATABASE_URL, db, app
 import os
 import subprocess
+from datetime import datetime
+import json
+from sqlalchemy.orm import aliased
 
 UPLOAD_FOLDER = 'uploads'
 people_data = None
@@ -52,16 +55,12 @@ def login():
 
 @app.route('/logout')
 def logout():
-    # Clear the user_id from the session if it exists
     session.pop('user_id', None)
-    
-    # Redirect to the index or login page after logout
     return redirect(url_for('index'))
    
 @app.route('/location')
 def location():
     if 'user_id' in session:
-        # Fetch user details using session information
         session_db = Session()
         user_id = session['user_id']
         user = session_db.query(User).filter_by(id=user_id).first()
@@ -72,21 +71,32 @@ def location():
     else:
         return redirect(url_for('index'))
 
-def save_license_plate(license_plate_text):
+def save_license_plate(license_plate_text, user_id):
     with current_app.app_context():
         existing_plate = Vehicle.query.filter_by(car_plate=license_plate_text).first()
         if not existing_plate:
-            user_id = session['user_id']
-            user = User.query.get(user_id)
+            user = User.query.get(user_id)   
             if user.type == 'police_ton_site':
                 police_ton_site = PoliceTonSite.query.get(user_id)
-                location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).first()
-                if location_history:
-                    street_name = location_history.street_name
-            new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture',street_name=street_name)
-            db.session.add(new_vehicle)
-            db.session.commit()
+                if police_ton_site:
+                    latest_location = (
+                        LocationHistory.query
+                        .filter_by(police_ton_site_id=police_ton_site.id)
+                        .order_by(LocationHistory.recorded_at.desc())
+                        .first()
+                    )
+                    recorded_at = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
+                    localisation = latest_location.street_name if latest_location else None
 
+                    existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
+                    if existing_record:
+                        status = "Recherche"
+                    else:
+                        status = "No Recherche"
+
+                    new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', localisation=localisation, recorded_at=recorded_at, Status=status)
+                    db.session.add(new_vehicle)
+                    db.session.commit()
 import requests
 from flask import jsonify, request
 
@@ -100,22 +110,24 @@ def save_location():
     api_key = 'AIzaSyBtX8iuhcojHtbqT7FXCAiTCRm32TGXX9c'
     url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={api_key}"
     response = requests.get(url)
-    
     if response.status_code == 200:
         result = response.json()
         if result['status'] == 'OK':
-            address = result['results'][0]['formatted_address']
-            # Remove specific portion from the address
-            address_parts = address.split(',')
-            street_name = address_parts[1] if len(address_parts) > 1 else address  # Choose the appropriate index
-            
-            session_db = Session()
+
+            results = result['results']
+            if results:
+                first_result = results[1]
+                street_name = first_result['formatted_address']            
             police_ton_site_id = session.get('police_ton_site_id')
             
             if police_ton_site_id:
-                location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name)
-                session_db.add(location_entry)
-                session_db.commit()
+                recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
+                location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
+                
+                # Add and commit the entry using SQLAlchemy session
+                db.session.add(location_entry)
+                db.session.commit()
+                
                 return jsonify({'success': True, 'street_name': street_name})
             else:
                 return jsonify({'success': False, 'message': 'User not found'})
@@ -141,8 +153,14 @@ def video():
 def run_detection():
     if request.method == 'POST':
         video_filename = request.form['video_filename']  # Get the video filename
-        subprocess.Popen(['python', './carplate/main.py', video_filename])
-        return 'Detection process started!'
+        
+        # Assuming user_id is available in the session
+        user_id = session.get('user_id')
+        if user_id:
+            subprocess.Popen(['python', './carplate/main.py', video_filename, str(user_id)])
+            return 'Detection process started!'
+        else:
+            return 'User ID not found in session'
     else:
         return 'Method Not Allowed'
 
@@ -163,6 +181,5 @@ def upload_video():
             if user.type == 'police_ton_site':
                 police_ton_site = PoliceTonSite.query.get(user_id)
                 location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).first()
-
     vehicles = Vehicle.query.all()
     return render_template('upload.html', vehicles=vehicles, user=user, location_history=location_history)

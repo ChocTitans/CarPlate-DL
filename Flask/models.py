@@ -1,6 +1,7 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -55,14 +56,16 @@ class LocationHistory(Base):
     latitude = Column(String)
     longitude = Column(String)
     street_name = Column(String)
+    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
 
     police_ton_site = relationship("PoliceTonSite", back_populates="location_history")
 
-    def __init__(self, police_ton_site_id, latitude, longitude, street_name):
+    def __init__(self, police_ton_site_id, latitude, longitude, street_name, recorded_at):
         self.police_ton_site_id = police_ton_site_id
         self.latitude = latitude
         self.longitude = longitude
         self.street_name = street_name
+        recorded_at = recorded_at
 
         
 class Person(Base):
@@ -80,6 +83,9 @@ class Vehicle(Base):
     car_plate = Column(String, primary_key=True)
     model = Column(String)
     localisation = Column(String)
+    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    Status = Column(String)
+
     fichiers = relationship("FichierDeRecherche", back_populates="vehicle")
 
 class FichierDeRecherche(Base):

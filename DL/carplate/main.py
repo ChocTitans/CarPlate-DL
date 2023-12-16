@@ -14,10 +14,14 @@ current_dir = os.path.dirname(__file__)
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 sys.path.append(parent_dir)
 
+
 from app import save_license_plate
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         video_filename = sys.argv[1]  # Get the video filename from command line argument
+        user_id = sys.argv[2]  # Get user ID from command line argument
 
         # Construct the video file path using the received filename
         video_path = f'./uploads/{video_filename}'
@@ -73,7 +77,7 @@ if __name__ == '__main__':
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
                                 if license_plate_text_score >= 0.5:
-                                    save_license_plate(license_plate_text)
+                                    save_license_plate(license_plate_text, user_id)
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
                                                           'license_plate': {'bbox': [x1, y1, x2, y2],
                                                                             'text': license_plate_text,
