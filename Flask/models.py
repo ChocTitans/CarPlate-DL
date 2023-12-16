@@ -82,11 +82,20 @@ class Vehicle(Base):
     __tablename__ = 'vehicles'
     car_plate = Column(String, primary_key=True)
     model = Column(String)
-    localisation = Column(String)
-    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
     Status = Column(String)
-
+    
+    # Remove localisation column and establish relationship with HistoricVoiture
+    historic_entries = relationship("HistoricVoiture", back_populates="vehicle")
     fichiers = relationship("FichierDeRecherche", back_populates="vehicle")
+
+class HistoricVoiture(Base):
+    __tablename__ = 'historic_voitures'
+    id = Column(Integer, primary_key=True)
+    vehicle_car_plate = Column(String, ForeignKey('vehicles.car_plate'))
+    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    localisation = Column(String)
+
+    vehicle = relationship("Vehicle", back_populates="historic_entries")
 
 class FichierDeRecherche(Base):
     __tablename__ = 'fichiers_de_recherche'

@@ -82,11 +82,19 @@ class Vehicle(db.Model):
     __tablename__ = 'vehicles'
     car_plate = db.Column(db.String, primary_key=True)
     model = db.Column(db.String)
-    localisation = db.Column(db.String)
-    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # Column for recording time
     Status = db.Column(db.String)
 
     fichiers = db.relationship("FichierDeRecherche", back_populates="vehicle")
+    historic_entries = db.relationship("HistoricVoiture", back_populates="vehicle")
+
+class HistoricVoiture(db.Model):
+    __tablename__ = 'historic_voitures'
+    id = db.Column(Integer, primary_key=True)
+    vehicle_car_plate = db.Column(String, ForeignKey('vehicles.car_plate'))
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    localisation = db.Column(String)
+
+    vehicle = db.relationship("Vehicle", back_populates="historic_entries")
 
 class FichierDeRecherche(db.Model):
     __tablename__ = 'fichiers_de_recherche'

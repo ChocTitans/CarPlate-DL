@@ -2,13 +2,15 @@ from flask import Flask, render_template, request, url_for, session, redirect, j
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import current_app
-from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche
+from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture
 from DL.config import DATABASE_URL, db, app
 import os
 import subprocess
 from datetime import datetime
 import json
 from sqlalchemy.orm import aliased
+from sqlalchemy import desc
+import requests
 
 UPLOAD_FOLDER = 'uploads'
 people_data = None
@@ -73,39 +75,41 @@ def location():
 
 def save_license_plate(license_plate_text, user_id):
     with current_app.app_context():
-        existing_plate = Vehicle.query.filter_by(car_plate=license_plate_text).first()
-        if not existing_plate:
-            user = User.query.get(user_id)   
-            if user.type == 'police_ton_site':
-                police_ton_site = PoliceTonSite.query.get(user_id)
-                if police_ton_site:
-                    latest_location = (
-                        LocationHistory.query
-                        .filter_by(police_ton_site_id=police_ton_site.id)
-                        .order_by(LocationHistory.recorded_at.desc())
-                        .first()
-                    )
-                    recorded_at = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
-                    localisation = latest_location.street_name if latest_location else None
+        user = User.query.get(user_id)   
+        if user.type == 'police_ton_site':
+            police_ton_site = PoliceTonSite.query.get(user_id)
+            if police_ton_site:
+                latest_location = (
+                    LocationHistory.query
+                    .filter_by(police_ton_site_id=police_ton_site.id)
+                    .order_by(LocationHistory.recorded_at.desc())
+                    .first()
+                )
+                recorded_at = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
+                localisation = latest_location.street_name if latest_location else None
 
-                    existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
-                    if existing_record:
-                        status = "Recherche"
-                    else:
-                        status = "No Recherche"
+                existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
+                if existing_record:
+                    status = "Recherche"
+                else:
+                    status = "No Recherche"
 
-                    new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', localisation=localisation, recorded_at=recorded_at, Status=status)
-                    db.session.add(new_vehicle)
-                    db.session.commit()
-import requests
-from flask import jsonify, request
+                new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status=status)
+                db.session.add(new_vehicle)
+                db.session.commit()
+
+                historic_entry = HistoricVoiture(vehicle=new_vehicle,localisation=localisation, recorded_at=recorded_at)
+                db.session.add(historic_entry)
+                db.session.commit()
+
+
 
 @app.route('/save-location', methods=['POST'])
 def save_location():
     data = request.json
     latitude = data.get('latitude')
     longitude = data.get('longitude')
-
+    
     # Call Google Geocoding API to convert latitude and longitude to a street address
     api_key = 'AIzaSyBtX8iuhcojHtbqT7FXCAiTCRm32TGXX9c'
     url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={api_key}"
@@ -117,25 +121,26 @@ def save_location():
             results = result['results']
             if results:
                 first_result = results[1]
-                street_name = first_result['formatted_address']            
+                street_name = first_result['formatted_address']       
             police_ton_site_id = session.get('police_ton_site_id')
             
             if police_ton_site_id:
                 recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
                 location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
-                
+                print(police_ton_site_id)
+                print(location_entry)
                 # Add and commit the entry using SQLAlchemy session
                 db.session.add(location_entry)
                 db.session.commit()
                 
-                return jsonify({'success': True, 'street_name': street_name})
+                return {'success': True}
             else:
-                return jsonify({'success': False, 'message': 'User not found'})
+                return {'success': False}
         else:
-            return jsonify({'success': False, 'error': 'Failed to retrieve street name'})
+            return {'success': False}
     else:
-        return jsonify({'success': False, 'error': 'Failed to connect to the Geocoding API'})
-
+        return {'success': False}
+    
 
 def video():
     if 'user_id' in session:
@@ -180,6 +185,6 @@ def upload_video():
             user = User.query.get(user_id)
             if user.type == 'police_ton_site':
                 police_ton_site = PoliceTonSite.query.get(user_id)
-                location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).first()
+                location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).order_by(desc(LocationHistory.id)).first()
     vehicles = Vehicle.query.all()
-    return render_template('upload.html', vehicles=vehicles, user=user, location_history=location_history)
+    return render_template('upload.html', vehicles=vehicles, location_history=location_history)
