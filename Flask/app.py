@@ -226,9 +226,13 @@ def submit_form():
 def deletefiche(fichier_id):
     fichier = FichierDeRecherche.query.get(fichier_id)
     if fichier:
-        db.session.delete(fichier)
-        db.session.commit()
+        associated_vehicle = fichier.vehicle  # Retrieve associated vehicle
+        if associated_vehicle:
+            associated_vehicle.Status = "Non Recherche"  # Update Status to "Non Recherche"
+            db.session.delete(fichier)
+            db.session.commit()
     return redirect(url_for('ficheliste'))
+
 
 
 @app.route('/edit-fiche/<int:fichier_id>', methods=['GET', 'POST'])
