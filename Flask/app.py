@@ -78,6 +78,27 @@ def ficheliste():
     
     return render_template('index.html')
 
+@app.route('/vehicule-liste')
+def vehiculeliste():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        vehicles = Vehicle.query.all()
+
+        if vehicles or user:
+            return render_template('liste-vehicules.html', vehicles=vehicles)
+    
+    return render_template('index.html')
+
+@app.route('/car-historic/<int:car_id>')
+def car_historic(car_id):
+    car = Vehicle.query.get(car_id)
+    if car:
+        historic_entries = car.historic_entries
+        return render_template('historic-vehicules.html', historic_entries=historic_entries)
+    # Handle case if the car ID doesn't exist
+    return "Car ID not found"
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -135,6 +156,14 @@ def get_updated_vehicles():
 def savelocation():
     dl_app_url = 'http://localhost:5050'
     dl_location_endpoint = f'{dl_app_url}/save-location'
+
+    requests.get(dl_location_endpoint)
+    return redirect(dl_location_endpoint)
+
+@app.route('/location')
+def location():
+    dl_app_url = 'http://localhost:5050'
+    dl_location_endpoint = f'{dl_app_url}/location'
 
     requests.get(dl_location_endpoint)
     return redirect(dl_location_endpoint)

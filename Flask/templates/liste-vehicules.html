@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+    <!-- Include Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="flex flex-col w-full min-h-screen bg-black text-white">
+        {% include 'header.html' %}
+
+        <main class="flex-1 overflow-y-auto p-4 space-y-8">
+          <div class="grid gap-4 lg:grid-cols-3"></div>
+          <div class="grid gap-4 lg:grid-cols-2 justify-items-end mx-0">
+            <div
+              class="rounded-lg border shadow-sm col-span-2 lg:col-span-2 bg-white text-black mx-auto w-full lg:w-full xl:w-full"
+              data-v0-t="card"
+            >
+              <div class="flex-col space-y-1.5 p-6 pb-2 flex justify-between items-center">
+                <h3 class="tracking-tight text-lg font-medium text-left">CRUD List</h3>
+              </div>
+              <div class="p-6">
+                <div class="relative w-full overflow-auto">
+                  <table class="w-full caption-bottom text-sm">
+                    <thead class="[&amp;_tr]:border-b">
+                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          ID
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Type
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Matricule
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Status
+                        </th>                                  
+                      </tr>
+                    </thead>
+                    <tbody class="[&amp;_tr:last-child]:border-0">
+                        {% for vehicle in vehicles %}
+                        <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ vehicle.id }}</td>
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ vehicle.model }}</td>
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ vehicle.car_plate }}</td>
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                            {% if vehicle.Status == 'Recherche' %}
+                              <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500">
+                                {{ vehicle.Status }}
+                              </span>
+                            {% else %}
+                              <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
+                                {{ vehicle.Status }}
+                              </span>
+                            {% endif %}
+                          </td>
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                            <a href="{{ url_for('car_historic', car_id=vehicle.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 text-white rounded-md px-2 py-1 ml-2" style="background-color: rgb(249 115 22);">
+                                Historique
+                              </a>
+                              
+                          </td>
+                        </tr>
+                      {% endfor %}
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="grid gap-4 lg:grid-cols-2"></div>
+        </main>
+        {% include 'footer.html' %}
+
+      </div>
+</body>
+
+</html>
