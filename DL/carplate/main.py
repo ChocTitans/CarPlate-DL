@@ -102,9 +102,10 @@ if __name__ == '__main__':
         print("Executing the visualize scripts")
         # Execute the second script
         subprocess.Popen(['python', './carplate/visualize.py', video_filename])
-    else:
-        print("Please provide the video filename as a command line argument")
-        
         time.sleep(5)
         with app.app_context():
+           print("reseted")
            reset_progress()
+    else:
+        print("Please provide the video filename as a command line argument")
+    

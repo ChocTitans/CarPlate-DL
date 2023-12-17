@@ -19,6 +19,13 @@ vehicles_data = None
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
+
+######################################################################
+#               
+#                   ROUTING IN GENERAL
+#
+######################################################################
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -73,6 +80,86 @@ def location():
     else:
         return redirect(url_for('index'))
 
+@app.route('/save-location', methods=['POST'])
+def save_location():
+    data = request.json
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    
+    # Call Google Geocoding API to convert latitude and longitude to a street address
+    api_key = 'AIzaSyBtX8iuhcojHtbqT7FXCAiTCRm32TGXX9c'
+    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        result = response.json()
+        if result['status'] == 'OK':
+
+            results = result['results']
+            if results:
+                first_result = results[1]
+                street_name = first_result['formatted_address']       
+            police_ton_site_id = session.get('police_ton_site_id')
+            
+            if police_ton_site_id:
+                recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
+                location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
+                # Add and commit the entry using SQLAlchemy session
+                db.session.add(location_entry)
+                db.session.commit()
+                
+                return {'success': True}
+            else:
+                return {'success': False}
+        else:
+            return {'success': False}
+    else:
+        return {'success': False}
+    
+
+@app.route('/run_detection', methods=['POST'])
+def run_detection():
+    if request.method == 'POST':
+        video_filename = request.form['video_filename']  # Get the video filename
+        
+        # Assuming user_id is available in the session
+        user_id = session.get('user_id')
+        if user_id:
+            subprocess.Popen(['python', './carplate/main.py', video_filename, str(user_id)])
+            return 'Detection process started!'
+        else:
+            return 'User ID not found in session'
+    else:
+        return 'Method Not Allowed'
+
+@app.route('/upload_video', methods=['GET', 'POST'])
+def upload_video():
+    if request.method == 'POST':
+        if 'user_id' in session:  # Check if user is logged in
+            if not os.path.exists(UPLOAD_FOLDER):
+                os.makedirs(UPLOAD_FOLDER)
+            video = request.files['video']
+            video_path = f"uploads/{video.filename}"  # Define the path to save the uploaded video
+            video.save(video_path)
+        else:
+            return redirect(url_for('index'))  # Redirect to index/login page if user is not logged in
+    if 'user_id' in session:
+            user_id = session['user_id']
+            user = User.query.get(user_id)
+            if user.type == 'police_ton_site':
+                police_ton_site = PoliceTonSite.query.get(user_id)
+                location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).order_by(desc(LocationHistory.id)).first()
+                
+    vehicles = Vehicle.query.all()
+    return render_template('upload.html', vehicles=vehicles, location_history=location_history)
+
+
+######################################################################
+#               
+#                   FUNCTIONS WITHOUT ROUTING
+#
+######################################################################
+    
+
 def save_license_plate(license_plate_text, user_id):
     with current_app.app_context():
         user = User.query.get(user_id)
@@ -107,6 +194,24 @@ def save_license_plate(license_plate_text, user_id):
                     db.session.add(historic_entry)
                     db.session.commit()
 
+
+def video():
+    if 'user_id' in session:
+        session_db = Session()
+        user_id = session['user_id']
+        user = session_db.query(User).filter_by(id=user_id).first()
+        session_db.close()
+
+        if user:
+            return render_template('upload.html')
+    else:
+        return redirect(url_for('index'))
+
+######################################################################
+#               
+#                   API PROGRESS FOR VIDEO LOADING BAR
+#
+######################################################################
 
 @app.route('/reset_progress', methods=['POST'])
 def reset_progress():
@@ -164,87 +269,3 @@ def updateds_vehicles():
     ]
 
     return jsonify(vehicle_data)
-
-@app.route('/save-location', methods=['POST'])
-def save_location():
-    data = request.json
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-    
-    # Call Google Geocoding API to convert latitude and longitude to a street address
-    api_key = 'AIzaSyBtX8iuhcojHtbqT7FXCAiTCRm32TGXX9c'
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={api_key}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        result = response.json()
-        if result['status'] == 'OK':
-
-            results = result['results']
-            if results:
-                first_result = results[1]
-                street_name = first_result['formatted_address']       
-            police_ton_site_id = session.get('police_ton_site_id')
-            
-            if police_ton_site_id:
-                recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
-                location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
-                # Add and commit the entry using SQLAlchemy session
-                db.session.add(location_entry)
-                db.session.commit()
-                
-                return {'success': True}
-            else:
-                return {'success': False}
-        else:
-            return {'success': False}
-    else:
-        return {'success': False}
-    
-
-def video():
-    if 'user_id' in session:
-        session_db = Session()
-        user_id = session['user_id']
-        user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
-
-        if user:
-            return render_template('upload.html')
-    else:
-        return redirect(url_for('index'))
-
-@app.route('/run_detection', methods=['POST'])
-def run_detection():
-    if request.method == 'POST':
-        video_filename = request.form['video_filename']  # Get the video filename
-        
-        # Assuming user_id is available in the session
-        user_id = session.get('user_id')
-        if user_id:
-            subprocess.Popen(['python', './carplate/main.py', video_filename, str(user_id)])
-            return 'Detection process started!'
-        else:
-            return 'User ID not found in session'
-    else:
-        return 'Method Not Allowed'
-
-@app.route('/upload_video', methods=['GET', 'POST'])
-def upload_video():
-    if request.method == 'POST':
-        if 'user_id' in session:  # Check if user is logged in
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.makedirs(UPLOAD_FOLDER)
-            video = request.files['video']
-            video_path = f"uploads/{video.filename}"  # Define the path to save the uploaded video
-            video.save(video_path)
-        else:
-            return redirect(url_for('index'))  # Redirect to index/login page if user is not logged in
-    if 'user_id' in session:
-            user_id = session['user_id']
-            user = User.query.get(user_id)
-            if user.type == 'police_ton_site':
-                police_ton_site = PoliceTonSite.query.get(user_id)
-                location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).order_by(desc(LocationHistory.id)).first()
-                
-    vehicles = Vehicle.query.all()
-    return render_template('upload.html', vehicles=vehicles, location_history=location_history)
