@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, session, redirect, j
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import current_app
-from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture
+from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture, Progress
 from DL.config import DATABASE_URL, db, app
 import os
 import subprocess
@@ -16,7 +16,6 @@ import logging
 UPLOAD_FOLDER = 'uploads'
 people_data = None
 vehicles_data = None
-
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
@@ -91,13 +90,14 @@ def save_license_plate(license_plate_text, user_id):
 
                 # Check if the license plate exists in FicherdeRecherche
                 existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
+                existing_vehicule = Vehicle.query.filter_by(car_plate=license_plate_text).first()
                 if existing_record:
                     # Update the 'Status' attribute of the vehicle to 'Recherche'
                     existing_vehicle = Vehicle.query.filter_by(car_plate=license_plate_text).first()
                     if existing_vehicle:
                         existing_vehicle.Status = "Recherche"
                         db.session.commit()
-                else:
+                elif not existing_vehicule:
                     # Add the license plate if it doesn't exist
                     new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="No Recherche")
                     db.session.add(new_vehicle)
@@ -107,37 +107,58 @@ def save_license_plate(license_plate_text, user_id):
                     db.session.add(historic_entry)
                     db.session.commit()
 
+
+@app.route('/reset_progress', methods=['POST'])
+def reset_progress():
+    progress_entry = Progress.query.first()
+    if progress_entry:
+        progress_entry.current_progress = 0
+        db.session.commit()
+        return jsonify({'message': 'Progress reset to 0 successfully.'}), 200
+    return jsonify({'message': 'No progress entry found.'}), 404
+
+@app.route('/update_progress/<int:progress>', methods=['GET'])
+def update_progress(progress):
+    progress_entry = Progress.query.first()
+    if not progress_entry:
+        progress_entry = Progress(current_progress=progress)
+        db.session.add(progress_entry)
+    else:
+        progress_entry.current_progress = progress
+
+    db.session.commit()
+    return jsonify({'message': 'Progress updated successfully.'})
+
+@app.route('/get_progress', methods=['GET'])
+def get_progress():
+    progress_entry = Progress.query.first()
+    if progress_entry:
+        return jsonify({'progress': progress_entry.current_progress})
+    return jsonify({'progress': 0})
+
 @app.route('/api/updated_vehicles', methods=['GET'])
 def updated_vehicles():
     dl_app_url = 'http://localhost:5000'
-    dl_updated_vehicles_endpoint = f'{dl_app_url}/api/vehicles'  # Replace with your endpoint
+    dl_updated_vehicles_endpoint = f'{dl_app_url}/api/vehicles'
 
     try:
-        # Make a GET request to the other application to fetch updated vehicle data
         response = requests.get(dl_updated_vehicles_endpoint)
         if response.status_code == 200:
-            # If the request is successful (status code 200), return the received data as JSON
             return jsonify(response.json())
         else:
-            # If the request fails, return an error message or handle it accordingly
             return jsonify({'error': f'Failed to fetch updated vehicles from external API. Status Code: {response.status_code}'}), 500
     except requests.RequestException as e:
-        # Log the exception for debugging
         logging.error(f'Request Exception: {e}', exc_info=True)
         return jsonify({'error': f'Request Exception: {e}'}), 500
 
 @app.route('/apis/updated_vehicles')
 def updateds_vehicles():
-    # Fetch the updated vehicle information from the database
-    # Assuming 'Status' is updated elsewhere in your application
     vehicles = Vehicle.query.all()
-
-    # Prepare the vehicle data to be sent in JSON format
     vehicle_data = [
         {
             'car_plate': vehicle.car_plate,
             'Status': vehicle.Status,
-            'index': vehicle.id  # Using vehicle id as an index (you can adjust this)
+            'index': vehicle.id
         }
         for vehicle in vehicles
     ]
@@ -167,8 +188,6 @@ def save_location():
             if police_ton_site_id:
                 recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
                 location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
-                print(police_ton_site_id)
-                print(location_entry)
                 # Add and commit the entry using SQLAlchemy session
                 db.session.add(location_entry)
                 db.session.commit()

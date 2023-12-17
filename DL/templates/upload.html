@@ -26,71 +26,79 @@
           </div>
         </header>
         <main class="p-4">
-          <div
-            class="rounded-lg border shadow-sm bg-white text-black flex flex-col items-center justify-center"
-            data-v0-t="card"
-          >
-            <div class="flex flex-col space-y-1.5 p-6">
-              <h2 class="text-xl font-bold">Highway video</h2>
+            <div class="rounded-lg border shadow-sm bg-white text-black flex flex-col items-center justify-center" data-v0-t="card" id="uploadingcard">
+                <div class="flex flex-col space-y-1.5 p-6">
+                    <h2 class="text-xl font-bold">Highway video</h2>
+                </div>
+                <div class="p-6 flex flex-col items-center">
+                    <label for="videoInput" class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[180px] text-center" id="fileLabel">
+                        <span id="fileLabelText">Choose a video</span>
+                        <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
+                    </label>
+                    <br>
+                    <button id="uploadButton" class="bg-black text-white items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                        Upload Video
+                    </button>
+                    <button id="detectButton" class="hidden bg-black text-white items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                        Detect Vehicles
+                    </button>
+                </div>
             </div>
-            <div class="p-6 flex flex-col items-center">
-                <label for="videoInput" class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[180px] text-center" id="fileLabel">
-                    <span id="fileLabelText">Choose a video</span>
-                    <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
-                        <path d="m6 9 6 6 6-6"></path>
-                    </svg>
-                </label>
-                <br>
-                <button id="uploadButton" class="bg-black text-white items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                    Upload Video
-                </button>
-                <button id="detectButton" class="hidden bg-black text-white items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                    Detect Vehicles
-                </button>
+            <div class="flex flex-col rounded-lg border shadow-sm mt-4 bg-white text-black" data-v0-t="card" id="loadingcard" style="display: none;">
+                <div class="flex flex-col justify-center items-center space-y-1.5 p-6">
+                    <h2 id ="loading" class="text-xl font-bold">Loading...</h2>
+                </div>
+                <div class="p-6">
+                    <div class="w-full flex justify-center">
+                        <div class="w-3/4 max-w-md h-5 bg-gray-200 rounded-full flex items-center">
+                            <div id="progressBar" class="h-full bg-blue-500 rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-          </div>
-          <div class="rounded-lg border shadow-sm mt-4 bg-white text-black" data-v0-t="card">
-            <div class="flex flex-col space-y-1.5 p-6">
-                <h2 class="text-xl font-bold">Matricule Detected</h2>
-            </div>
-            <div class="p-6">
-                <div class="divide-y divide-gray-200">
-                    <div class="grid grid-cols-3">
-                        <div>ID</div>
-                        <div>Matricule</div>
-                        <div>Status</div>
-                    </div>
-                    <br>
-                    <!-- Iterate through matricules and display each one -->
-                    <div id="vehicleList" >
-                        {% for vehicle in vehicles %}
+            
+            
+            <div class="rounded-lg border shadow-sm mt-4 bg-white text-black" data-v0-t="card">
+                <div class="flex flex-col space-y-1.5 p-6">
+                    <h2 class="text-xl font-bold">Matricule Detected</h2>
+                </div>
+                <div class="p-6">
+                    <div class="divide-y divide-gray-200">
                         <div class="grid grid-cols-3">
-                            <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
-                            <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
-                            <div class="inline-flex items-center">
-                                {% if vehicle.Status == 'Recherche' %}
+                            <div>ID</div>
+                            <div>Matricule</div>
+                            <div>Status</div>
+                        </div>
+                        <br>
+                        <!-- Iterate through matricules and display each one -->
+                        <div id="vehicleList">
+                            {% for vehicle in vehicles %}
+                            <div class="grid grid-cols-3">
+                                <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
+                                <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
+                                <div class="inline-flex items-center">
+                                    {% if vehicle.Status == 'Recherche' %}
                                     <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500">
                                         {{ vehicle.Status }}
                                     </span>
-                                {% else %}
+                                    {% else %}
                                     <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
                                         {{ vehicle.Status }}
                                     </span>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                 </div>
+                    </div>
                 </div>
             </div>
-        </div>
         
-          <div class="mt-4">
-          </div>
-          {% include 'footer.html' %}
-
+            <div class="mt-4"></div>
+            {% include 'footer.html' %}
         </main>
+        
         
       </div>
 
@@ -108,6 +116,11 @@
         document.getElementById('detectButton').classList.remove('hidden');
         document.getElementById('detectButton').addEventListener('click', function() {
         this.textContent = 'Detecting...';
+        this.disabled = true;
+        setTimeout(function() {
+            document.getElementById('uploadingcard').style.display = 'none';
+            document.getElementById('loadingcard').style.display = 'flex';
+        }, 3000);
         });
 
     });
@@ -126,6 +139,8 @@ document.getElementById('detectButton').addEventListener('click', function() {
         .then(response => {
             // Handle the response from the server
             console.log(response);
+            progressInterval = setInterval(fetchProgress, 2000); // Fetch progress every 1 second (adjust interval as needed)
+
         })
         .catch(error => {
             // Handle errors
@@ -133,6 +148,47 @@ document.getElementById('detectButton').addEventListener('click', function() {
         });
     }
 });
+
+
+function updateProgress(progress) {
+    fetch(`/update_progress/${progress}`, { method: 'GET' })
+        .then(response => response.json())
+        .then(data => {
+            // Handle success if needed
+            console.log('Progress updated:', data.message);
+            
+            // Stop progress check if it reaches 100%
+            if (progress == 100) {
+                clearInterval(progressInterval);
+                document.getElementById('loading').innerHTML = "Video completed ! "
+
+            }
+        })
+        .catch(error => {
+            // Handle error if needed
+            console.error('Error updating progress:', error);
+        });
+}
+
+function updateLoadingBar(progress) {
+    const progressBar = document.getElementById('progressBar');
+    progressBar.style.width = `${progress}%`;
+    updateProgress(progress);
+}
+
+
+function fetchProgress() {
+    fetch('/get_progress')
+        .then(response => response.json())
+        .then(data => {
+            if (data.progress !== undefined) {
+                updateLoadingBar(data.progress);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching progress:', error);
+        });
+}
 
 function uploadVideo(file) {
     const formData = new FormData();
@@ -156,6 +212,7 @@ document.getElementById('videoInput').addEventListener('change', function() {
     const fileName = this.files[0].name;
     document.getElementById('fileLabelText').textContent = fileName;
 });
+
 function fetchUpdatedVehicles() {
     fetch('/api/updated_vehicles')  // Replace with your API endpoint
         .then(response => response.json())
@@ -194,7 +251,6 @@ function fetchUpdatedVehicles() {
             console.error('Error fetching updated vehicles:', error);
         });
 }
-setInterval(fetchUpdatedVehicles, 5000);  // 5000 milliseconds = 5 seconds
-
+setInterval(fetchUpdatedVehicles, 3000);
 </script>
 </body>

@@ -28,37 +28,29 @@ def index():
     return render_template('index.html')
 
 def load_people():
-    session = Session()
     try:
-        people_data = session.query(Person).all()
+        people_data = Person.query.all()
         return people_data
     except Exception as e:
         # Handle exceptions if necessary
         logging.error(f'Error loading people: {e}', exc_info=True)
         return None
-    finally:
-        session.close()
 
 def load_vehicles():
-    session = Session()
     try:
-        vehicles_data = session.query(Vehicle).all()
+        vehicles_data = Vehicle.query.all()
         return vehicles_data
     except Exception as e:
         # Handle exceptions if necessary
         logging.error(f'Error loading vehicles: {e}', exc_info=True)
         return None
-    finally:
-        session.close()
 
 
 @app.route('/add-fiche')
 def addfiche():
     if 'user_id' in session:
-        # Fetch user details using session information
-        session_db = Session()
         user_id = session['user_id']
-        user = session_db.query(User).filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id).first()
 
         if user:
             try:
@@ -70,8 +62,6 @@ def addfiche():
                 # Handle exceptions if necessary
                 logging.error(f'Error fetching data for add-fiche: {e}', exc_info=True)
                 return render_template('index.html')
-            finally:
-                session_db.close()
     
     return render_template('index.html')
 
@@ -79,21 +69,13 @@ def addfiche():
 @app.route('/fiche-liste')
 def ficheliste():
     if 'user_id' in session:
-        try:
-            # Fetch user details using session information
-            session_db = Session()
-            user_id = session['user_id']
-            user = session_db.query(User).filter_by(id=user_id).first()
-            fichiers = session_db.query(FichierDeRecherche).all()
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        fichiers = FichierDeRecherche.query.all()
 
-            if fichiers or user:
-                return render_template('liste-fiche.html', fichiers=fichiers)
-        except Exception as e:
-            # Handle exceptions if necessary
-            logging.error(f'Error fetching data for fiche-liste: {e}', exc_info=True)
-        finally:
-            session_db.close()
-
+        if fichiers or user:
+            return render_template('liste-fiche.html', fichiers=fichiers)
+    
     return render_template('index.html')
 
 
@@ -103,12 +85,11 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        session_db = Session()
-        user = session_db.query(User).filter_by(email=email, password=password).first()
+        user = User.query.filter_by(email=email, password=password).first()
 
         if user:
             if user.type == 'police_ton_site':
-                police_ton_site = session_db.query(PoliceTonSite).filter_by(id=user.id).first()
+                police_ton_site = PoliceTonSite.query.filter_by(id=user.id).first()
                 if police_ton_site:
                     session['user_id'] = user.id
                     session['police_ton_site_id'] = police_ton_site.id
@@ -116,8 +97,8 @@ def login():
             else:
                 session['user_id'] = user.id
                 return redirect(url_for('dashboard'))  # Redirect based on user type (if needed)
-        else:
-            return redirect(url_for('index'))  # Redirect if login fails
+        
+        return redirect(url_for('index'))  # Redirect if login fails
 
 
 @app.route('/logout')
@@ -191,17 +172,13 @@ def video():
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' in session:
-        # Fetch user details using session information
-        session_db = Session()
         user_id = session['user_id']
-        user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
+        user = User.query.filter_by(id=user_id).first()
 
         if user:
             return render_template('dashboard.html')
-    else:
-        return redirect(url_for('index'))
-
+    
+    return redirect(url_for('index'))
 
 ## CRUD ADD FICHE
 
@@ -217,17 +194,16 @@ def submit_form():
 
         new_fiche = FichierDeRecherche(name=nom_fiche, address=last_seen_address, description=description)
 
-        with Session() as session_db:
-            selected_person = session_db.query(Person).filter_by(cin=selected_person_id).first()
-            selected_vehicle = session_db.query(Vehicle).filter_by(car_plate=selected_vehicle_id).first()
+        selected_person = Person.query.filter_by(cin=selected_person_id).first()
+        selected_vehicle = Vehicle.query.filter_by(car_plate=selected_vehicle_id).first()
 
-            if selected_person:
-                new_fiche.person = selected_person
-            if selected_vehicle:
-                new_fiche.vehicle = selected_vehicle
+        if selected_person:
+            new_fiche.person = selected_person
+        if selected_vehicle:
+            new_fiche.vehicle = selected_vehicle
 
-            session_db.add(new_fiche)
-            session_db.commit()
+        db.session.add(new_fiche)
+        db.session.commit()
 
         return redirect(url_for('ficheliste'))
 
@@ -235,18 +211,16 @@ def submit_form():
     
 @app.route('/delete-fiche/<int:fichier_id>', methods=['GET', 'POST'])
 def deletefiche(fichier_id):
-    session_db = Session()
-    fichier = session_db.query(FichierDeRecherche).get(fichier_id)
+    fichier = FichierDeRecherche.query.get(fichier_id)
     if fichier:
-        session_db.delete(fichier)
-        session_db.commit()
+        db.session.delete(fichier)
+        db.session.commit()
     return redirect(url_for('ficheliste'))
 
 
 @app.route('/edit-fiche/<int:fichier_id>', methods=['GET', 'POST'])
 def editfiche(fichier_id):
-    session_db = Session()
-    fichier = session_db.query(FichierDeRecherche).get(fichier_id)
+    fichier = FichierDeRecherche.query.get(fichier_id)
 
     if request.method == 'POST':
         fichier.name = request.form['nom_fiche']
@@ -255,7 +229,7 @@ def editfiche(fichier_id):
         fichier.vehicle_car_plate = request.form['selectedVehicle']
         fichier.description = request.form['description']
 
-        session_db.commit()
+        db.session.commit()
 
         return redirect(url_for('ficheliste'))
 

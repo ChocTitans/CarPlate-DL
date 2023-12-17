@@ -15,7 +15,7 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 sys.path.append(parent_dir)
 
 
-from app import save_license_plate
+from app import save_license_plate, update_progress, reset_progress
 
 
 if __name__ == '__main__':
@@ -36,15 +36,22 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
+        total_frames = 10  # Assuming 10 frames as the limit
+        frame_count = 0  # Initialize the frame counter
+        current_progress = 0
         frame_nmr = -1
         ret = True
         while ret:
             frame_nmr += 1
             ret, frame = cap.read()
             if ret:
-                if frame_nmr > 10:  # 100 = 3 secs
+                if frame_count >= total_frames:  # Check frame_count instead of frame_nmr
                     break
                 results[frame_nmr] = {}
+                frame_count += 1
+                current_progress = int((frame_count / total_frames) * 100)
+                with app.app_context():  # Establish the app context
+                    update_progress(current_progress)
                 # detect vehicles
                 detections = coco_model(frame)[0]
                 detections_ = []
@@ -78,12 +85,12 @@ if __name__ == '__main__':
                             with app.app_context():  # Establish the app context
                                 if license_plate_text_score >= 0.5:
                                     save_license_plate(license_plate_text, user_id)
+
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
                                                           'license_plate': {'bbox': [x1, y1, x2, y2],
                                                                             'text': license_plate_text,
                                                                             'bbox_score': score,
                                                                             'text_score': license_plate_text_score}}
-
         # write results
         print("Writing in the csv")
         write_csv(results, './carplate/test.csv')
@@ -97,3 +104,7 @@ if __name__ == '__main__':
         subprocess.Popen(['python', './carplate/visualize.py', video_filename])
     else:
         print("Please provide the video filename as a command line argument")
+        
+        time.sleep(5)
+        with app.app_context():
+           reset_progress()

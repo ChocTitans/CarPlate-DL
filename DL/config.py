@@ -4,6 +4,6 @@ from flask import Flask
 # config.py
 app = Flask(__name__)
 app.secret_key = "yoursecretkey"
-DATABASE_URL = 'sqlite:///../Flask/database.db'
+DATABASE_URL = 'sqlite:///../Flask/instance/database.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 db = SQLAlchemy(app)

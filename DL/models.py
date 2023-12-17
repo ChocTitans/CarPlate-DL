@@ -6,6 +6,11 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import DateTime
 
+
+class Progress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    current_progress = db.Column(db.Integer, default=0)
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)

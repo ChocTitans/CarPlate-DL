@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import DateTime
 
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -108,3 +109,8 @@ class FichierDeRecherche(db.Model):
 
     person = db.relationship("Person", back_populates="fichiers")
     vehicle = db.relationship("Vehicle", back_populates="fichiers")
+
+
+class Progress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    current_progress = db.Column(db.Integer, default=0)
