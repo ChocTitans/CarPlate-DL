@@ -56,28 +56,32 @@
             </div>
             <div class="p-6">
                 <div class="divide-y divide-gray-200">
-                    <div class="grid grid-cols-5">
+                    <div class="grid grid-cols-3">
                         <div>ID</div>
                         <div>Matricule</div>
-                        <div>Localisation</div>
-                        <div>Date / Time</div>
                         <div>Status</div>
                     </div>
                     <br>
                     <!-- Iterate through matricules and display each one -->
-                    {% for vehicle in vehicles %}
-                    <div class="grid grid-cols-5">
-                        <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
-                        <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
-                        <div>{{ vehicle.localisation }}</div> <!-- Display localisation -->
-                        <div>{{ vehicle.recorded_at }}</div> 
-                        <div class="inline-flex items-center">
-                          <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
-                            {{ vehicle.Status }}
-                          </span>
-                      </div>
-                      </div>
-                    {% endfor %}
+                    <div id="vehicleList" >
+                        {% for vehicle in vehicles %}
+                        <div class="grid grid-cols-3">
+                            <div>{{ loop.index }}</div> <!-- Display an index or unique identifier -->
+                            <div>{{ vehicle.car_plate }}</div> <!-- Display the matricule -->
+                            <div class="inline-flex items-center">
+                                {% if vehicle.Status == 'Recherche' %}
+                                    <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500">
+                                        {{ vehicle.Status }}
+                                    </span>
+                                {% else %}
+                                    <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
+                                        {{ vehicle.Status }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                 </div>
                 </div>
             </div>
         </div>
@@ -92,20 +96,21 @@
 
       <script>
       document.getElementById('uploadButton').addEventListener('click', function() {
-    const input = document.getElementById('videoInput');
-    const file = input.files[0];
-    if (file) {
-        uploadVideo(file);
+        const input = document.getElementById('videoInput');
+        const file = input.files[0];
+        if (file) {
+            uploadVideo(file);
 
-    
-    }
-    this.style.display = 'none';
-    document.getElementById('detectButton').classList.remove('hidden');
-    document.getElementById('detectButton').addEventListener('click', function() {
-    this.textContent = 'Detecting...';
-});
+        
+        }
+        this.style.display = 'none';
+        document.getElementById('videoInput').disabled = true;
+        document.getElementById('detectButton').classList.remove('hidden');
+        document.getElementById('detectButton').addEventListener('click', function() {
+        this.textContent = 'Detecting...';
+        });
 
-});
+    });
 
 document.getElementById('detectButton').addEventListener('click', function() {
     const input = document.getElementById('videoInput');
@@ -151,6 +156,45 @@ document.getElementById('videoInput').addEventListener('change', function() {
     const fileName = this.files[0].name;
     document.getElementById('fileLabelText').textContent = fileName;
 });
+function fetchUpdatedVehicles() {
+    fetch('/api/updated_vehicles')  // Replace with your API endpoint
+        .then(response => response.json())
+        .then(data => {
+            const vehicleList = document.getElementById('vehicleList');
+            vehicleList.innerHTML = ''; // Clear the existing list
+
+            data.forEach(vehicle => {
+                const vehicleDiv = document.createElement('div');
+                vehicleDiv.classList.add('grid', 'grid-cols-3');
+
+                const indexDiv = document.createElement('div');
+                indexDiv.textContent = vehicle.index;
+                vehicleDiv.appendChild(indexDiv);
+
+                const plateDiv = document.createElement('div');
+                plateDiv.textContent = vehicle.car_plate;
+                vehicleDiv.appendChild(plateDiv);
+
+                const statusDiv = document.createElement('div');
+                const statusSpan = document.createElement('span');
+                statusSpan.textContent = vehicle.Status;
+                statusSpan.classList.add('rounded-full', 'border', 'px-2.5', 'py-0.5', 'text-xs', 'font-semibold', 'transition-colors', 'focus:outline-none', 'focus:ring-2', 'focus:ring-ring', 'focus:ring-offset-2');
+                if (vehicle.Status === 'Recherche') {
+                    statusSpan.classList.add('bg-red-500');
+                } else {
+                    statusSpan.classList.add('bg-green-500');
+                }
+                statusDiv.appendChild(statusSpan);
+                vehicleDiv.appendChild(statusDiv);
+
+                vehicleList.appendChild(vehicleDiv); // Append the new vehicle div to the existing list
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching updated vehicles:', error);
+        });
+}
+setInterval(fetchUpdatedVehicles, 5000);  // 5000 milliseconds = 5 seconds
 
 </script>
 </body>

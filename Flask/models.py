@@ -1,16 +1,17 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date, DateTime
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from config import db
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy import DateTime
 
-Base = declarative_base()
-
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    email = Column(String)
-    password = Column(String)
-    type = Column(String)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String)
+    password = db.Column(db.String)
+    type = db.Column(db.String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'user',
@@ -23,10 +24,10 @@ class User(Base):
 
 class PoliceTonSite(User):
     __tablename__ = 'police_ton_sites'
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    site_code = Column(String)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    site_code = db.Column(db.String)
 
-    location_history = relationship("LocationHistory", back_populates="police_ton_site")
+    location_history = db.relationship("LocationHistory", back_populates="police_ton_site")
 
     __mapper_args__ = {
         'polymorphic_identity': 'police_ton_site',
@@ -38,8 +39,8 @@ class PoliceTonSite(User):
 
 class PoliceBrigader(User):
     __tablename__ = 'police_brigaders'
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    badge_number = Column(Integer)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    badge_number = db.Column(db.Integer)
 
     __mapper_args__ = {
         'polymorphic_identity': 'police_brigader',
@@ -48,17 +49,17 @@ class PoliceBrigader(User):
     def __init__(self, email, password, badge_number):
         super().__init__(email, password)
         self.badge_number = badge_number
-
-class LocationHistory(Base):
+        
+class LocationHistory(db.Model):
     __tablename__ = 'location_history'
-    id = Column(Integer, primary_key=True)
-    police_ton_site_id = Column(Integer, ForeignKey('police_ton_sites.id'))
-    latitude = Column(String)
-    longitude = Column(String)
-    street_name = Column(String)
-    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    id = db.Column(db.Integer, primary_key=True)
+    police_ton_site_id = db.Column(db.Integer, db.ForeignKey('police_ton_sites.id'))
+    latitude = db.Column(db.String)
+    longitude = db.Column(db.String)
+    street_name = db.Column(db.String)  # New column for street name
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # Column for recording time
 
-    police_ton_site = relationship("PoliceTonSite", back_populates="location_history")
+    police_ton_site = db.relationship("PoliceTonSite", back_populates="location_history")
 
     def __init__(self, police_ton_site_id, latitude, longitude, street_name, recorded_at):
         self.police_ton_site_id = police_ton_site_id
@@ -67,44 +68,43 @@ class LocationHistory(Base):
         self.street_name = street_name
         recorded_at = recorded_at
 
-        
-class Person(Base):
+class Person(db.Model):
     __tablename__ = 'persons'
-    cin = Column(String, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    dob = Column(Date)
-    address = Column(String)
+    cin = db.Column(db.String, primary_key=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
+    dob = db.Column(db.Date)
+    address = db.Column(db.String)
 
-    fichiers = relationship("FichierDeRecherche", back_populates="person")
+    fichiers = db.relationship("FichierDeRecherche", back_populates="person")
 
-class Vehicle(Base):
+class Vehicle(db.Model):
     __tablename__ = 'vehicles'
-    car_plate = Column(String, primary_key=True)
-    model = Column(String)
-    Status = Column(String)
-    
-    # Remove localisation column and establish relationship with HistoricVoiture
-    historic_entries = relationship("HistoricVoiture", back_populates="vehicle")
-    fichiers = relationship("FichierDeRecherche", back_populates="vehicle")
+    id = db.Column(db.Integer, primary_key=True)
+    car_plate = db.Column(db.String)
+    model = db.Column(db.String)
+    Status = db.Column(db.String)
 
-class HistoricVoiture(Base):
+    fichiers = db.relationship("FichierDeRecherche", back_populates="vehicle")
+    historic_entries = db.relationship("HistoricVoiture", back_populates="vehicle")
+
+class HistoricVoiture(db.Model):
     __tablename__ = 'historic_voitures'
-    id = Column(Integer, primary_key=True)
-    vehicle_car_plate = Column(String, ForeignKey('vehicles.car_plate'))
-    recorded_at = Column(DateTime, default=datetime.utcnow)  # New column for recording time
-    localisation = Column(String)
+    id = db.Column(Integer, primary_key=True)
+    vehicle_id = db.Column(String, ForeignKey('vehicles.id'))
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    localisation = db.Column(String)
 
-    vehicle = relationship("Vehicle", back_populates="historic_entries")
+    vehicle = db.relationship("Vehicle", back_populates="historic_entries")
 
-class FichierDeRecherche(Base):
+class FichierDeRecherche(db.Model):
     __tablename__ = 'fichiers_de_recherche'
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    address = Column(String)
-    description = Column(String)
-    person_cin = Column(String, ForeignKey('persons.cin'))
-    vehicle_car_plate = Column(String, ForeignKey('vehicles.car_plate'))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    address = db.Column(db.String)
+    description = db.Column(db.String)
+    person_cin = db.Column(db.String, db.ForeignKey('persons.cin'))
+    vehicle_car_plate = db.Column(db.String, db.ForeignKey('vehicles.car_plate'))
 
-    person = relationship("Person", back_populates="fichiers")
-    vehicle = relationship("Vehicle", back_populates="fichiers")
+    person = db.relationship("Person", back_populates="fichiers")
+    vehicle = db.relationship("Vehicle", back_populates="fichiers")

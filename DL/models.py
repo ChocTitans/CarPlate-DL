@@ -80,7 +80,8 @@ class Person(db.Model):
 
 class Vehicle(db.Model):
     __tablename__ = 'vehicles'
-    car_plate = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    car_plate = db.Column(db.String)
     model = db.Column(db.String)
     Status = db.Column(db.String)
 
@@ -90,7 +91,7 @@ class Vehicle(db.Model):
 class HistoricVoiture(db.Model):
     __tablename__ = 'historic_voitures'
     id = db.Column(Integer, primary_key=True)
-    vehicle_car_plate = db.Column(String, ForeignKey('vehicles.car_plate'))
+    vehicle_id = db.Column(String, ForeignKey('vehicles.id'))
     recorded_at = db.Column(DateTime, default=datetime.utcnow)  # New column for recording time
     localisation = db.Column(String)
 

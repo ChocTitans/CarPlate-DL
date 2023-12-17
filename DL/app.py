@@ -11,6 +11,7 @@ import json
 from sqlalchemy.orm import aliased
 from sqlalchemy import desc
 import requests
+import logging
 
 UPLOAD_FOLDER = 'uploads'
 people_data = None
@@ -75,7 +76,7 @@ def location():
 
 def save_license_plate(license_plate_text, user_id):
     with current_app.app_context():
-        user = User.query.get(user_id)   
+        user = User.query.get(user_id)
         if user.type == 'police_ton_site':
             police_ton_site = PoliceTonSite.query.get(user_id)
             if police_ton_site:
@@ -85,24 +86,63 @@ def save_license_plate(license_plate_text, user_id):
                     .order_by(LocationHistory.recorded_at.desc())
                     .first()
                 )
-                recorded_at = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
+                recorded_at = datetime.utcnow().replace(second=0, microsecond=0)
                 localisation = latest_location.street_name if latest_location else None
 
+                # Check if the license plate exists in FicherdeRecherche
                 existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
                 if existing_record:
-                    status = "Recherche"
+                    # Update the 'Status' attribute of the vehicle to 'Recherche'
+                    existing_vehicle = Vehicle.query.filter_by(car_plate=license_plate_text).first()
+                    if existing_vehicle:
+                        existing_vehicle.Status = "Recherche"
+                        db.session.commit()
                 else:
-                    status = "No Recherche"
+                    # Add the license plate if it doesn't exist
+                    new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="No Recherche")
+                    db.session.add(new_vehicle)
+                    db.session.commit()
 
-                new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status=status)
-                db.session.add(new_vehicle)
-                db.session.commit()
+                    historic_entry = HistoricVoiture(vehicle=new_vehicle, localisation=localisation, recorded_at=recorded_at)
+                    db.session.add(historic_entry)
+                    db.session.commit()
 
-                historic_entry = HistoricVoiture(vehicle=new_vehicle,localisation=localisation, recorded_at=recorded_at)
-                db.session.add(historic_entry)
-                db.session.commit()
+@app.route('/api/updated_vehicles', methods=['GET'])
+def updated_vehicles():
+    dl_app_url = 'http://localhost:5000'
+    dl_updated_vehicles_endpoint = f'{dl_app_url}/api/vehicles'  # Replace with your endpoint
 
+    try:
+        # Make a GET request to the other application to fetch updated vehicle data
+        response = requests.get(dl_updated_vehicles_endpoint)
+        if response.status_code == 200:
+            # If the request is successful (status code 200), return the received data as JSON
+            return jsonify(response.json())
+        else:
+            # If the request fails, return an error message or handle it accordingly
+            return jsonify({'error': f'Failed to fetch updated vehicles from external API. Status Code: {response.status_code}'}), 500
+    except requests.RequestException as e:
+        # Log the exception for debugging
+        logging.error(f'Request Exception: {e}', exc_info=True)
+        return jsonify({'error': f'Request Exception: {e}'}), 500
 
+@app.route('/apis/updated_vehicles')
+def updateds_vehicles():
+    # Fetch the updated vehicle information from the database
+    # Assuming 'Status' is updated elsewhere in your application
+    vehicles = Vehicle.query.all()
+
+    # Prepare the vehicle data to be sent in JSON format
+    vehicle_data = [
+        {
+            'car_plate': vehicle.car_plate,
+            'Status': vehicle.Status,
+            'index': vehicle.id  # Using vehicle id as an index (you can adjust this)
+        }
+        for vehicle in vehicles
+    ]
+
+    return jsonify(vehicle_data)
 
 @app.route('/save-location', methods=['POST'])
 def save_location():
@@ -186,5 +226,6 @@ def upload_video():
             if user.type == 'police_ton_site':
                 police_ton_site = PoliceTonSite.query.get(user_id)
                 location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).order_by(desc(LocationHistory.id)).first()
+                
     vehicles = Vehicle.query.all()
     return render_template('upload.html', vehicles=vehicles, location_history=location_history)
