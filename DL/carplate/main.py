@@ -107,9 +107,9 @@ if __name__ == '__main__':
         process.wait()
         time.sleep(2)
         with app.app_context():
-           current_progress = 100
+            current_progress = 100
             time.sleep(3)
-           reset_progress()
+            reset_progress()
     else:
         print("Please provide the video filename as a command line argument")
     
