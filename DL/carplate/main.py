@@ -83,7 +83,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score >= 0.55:
+                                if license_plate_text_score > 0.6:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         time.sleep(2)
         with app.app_context():
             current_progress = 100
-            time.sleep(3)
+            time.sleep(5)
             reset_progress()
     else:
         print("Please provide the video filename as a command line argument")

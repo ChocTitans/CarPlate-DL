@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, session, redirect, j
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import current_app
-from DL.models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture, Progress
+from DL.models import User, Vehicle, PoliceTerrain, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture, Progress
 from DL.config import DATABASE_URL, db, app
 import os
 import subprocess
@@ -50,7 +50,7 @@ def login():
 
         if user:
             if user.type == 'police_ton_site':
-                police_ton_site = session_db.query(PoliceTonSite).filter_by(id=user.id).first()
+                police_ton_site = session_db.query(PoliceTerrain).filter_by(id=user.id).first()
                 if police_ton_site:
                     session['user_id'] = user.id
                     session['police_ton_site_id'] = police_ton_site.id
@@ -146,7 +146,7 @@ def upload_video():
             user_id = session['user_id']
             user = User.query.get(user_id)
             if user.type == 'police_ton_site':
-                police_ton_site = PoliceTonSite.query.get(user_id)
+                police_ton_site = PoliceTerrain.query.get(user_id)
                 location_history = LocationHistory.query.filter_by(police_ton_site_id=police_ton_site.id).order_by(desc(LocationHistory.id)).first()
                 
     vehicles = Vehicle.query.all()
@@ -164,7 +164,7 @@ def save_license_plate(license_plate_text, user_id):
     with current_app.app_context():
         user = User.query.get(user_id)
         if user.type == 'police_ton_site':
-            police_ton_site = PoliceTonSite.query.get(user_id)
+            police_ton_site = PoliceTerrain.query.get(user_id)
             if police_ton_site:
                 latest_location = (
                     LocationHistory.query
@@ -177,16 +177,34 @@ def save_license_plate(license_plate_text, user_id):
 
                 # Check if the license plate exists in FicherdeRecherche
                 existing_vehicule = Vehicle.query.filter_by(car_plate=license_plate_text).first()
+
                 if existing_vehicule:
                     existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
+                    
                     if existing_record:
                         existing_vehicule.Status = "Recherche"
                         db.session.commit()
                     else:
-                        historic_entry = HistoricVoiture(vehicle=existing_vehicule, localisation=localisation, recorded_at=recorded_at)
-                        db.session.add(historic_entry)
-                        db.session.commit()
-                        
+                        # Check if the vehicle already has a record in the same street area
+                        existing_location = (
+                            LocationHistory.query
+                            .filter_by(
+                                police_ton_site_id=police_ton_site.id,
+                                street_name=localisation  # Assuming street_name is the street area field
+                            )
+                            .first()
+                        )
+                        if existing_location:
+                            # Print the vehicle's existing location for comparison
+                            print(f"Existing location: {existing_location.street_name}")
+                            print(f"Localisation variable: {localisation}")
+
+                        if not existing_location:
+                            # Add the location history for the vehicle
+                            historic_entry = HistoricVoiture(vehicle=existing_vehicule, localisation=localisation, recorded_at=recorded_at)
+                            db.session.add(historic_entry)
+                            db.session.commit()
+
                 else:
                     # Add the license plate if it doesn't exist
                     new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="Non Recherche")

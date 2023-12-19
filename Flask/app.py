@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, session, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from models import User, Vehicle, PoliceTonSite, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture
+from models import User, Vehicle, PoliceTerrain, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture
 from flask import Flask, request
 from config import DATABASE_URL, app, db
 from sqlalchemy import create_engine
@@ -42,7 +42,7 @@ def login():
 
         if user:
             if user.type == 'police_ton_site':
-                police_ton_site = PoliceTonSite.query.filter_by(id=user.id).first()
+                police_ton_site = PoliceTerrain.query.filter_by(id=user.id).first()
                 if police_ton_site:
                     session['user_id'] = user.id
                     session['police_ton_site_id'] = police_ton_site.id
@@ -70,7 +70,6 @@ def video():
         user_id = session['user_id']
         user = session_db.query(User).filter_by(id=user_id).first()
         session_db.close()
-
         if user:
             return render_template('upload.html')
     else:
@@ -81,11 +80,21 @@ def dashboard():
     if 'user_id' in session:
         user_id = session['user_id']
         user = User.query.filter_by(id=user_id).first()
+        fiches = load_fiche_recherche()
+        people = load_people()
+        pt = load_police_terrain()
 
-        if user:
-            return render_template('dashboard.html')
+        if user and people:
+            total_persons = len(people)
+            total_fiches = len(fiches)
+            previous_month_total = 1  # Replace this with the actual previous month's total
+            percentage_change = ((total_persons - previous_month_total) / previous_month_total) * 100
+            percentage_change_fiches = ((total_fiches - previous_month_total) / previous_month_total * 100)
+
+        return render_template('dashboard.html', pt=pt, total_fiches=total_fiches,fiches=fiches, percentage_change_fiches=percentage_change_fiches,total_persons=total_persons, percentage_change=percentage_change)
     
     return redirect(url_for('index'))
+
 
 
 ######################################################################
@@ -110,6 +119,24 @@ def load_vehicles():
     except Exception as e:
         # Handle exceptions if necessary
         logging.error(f'Error loading vehicles: {e}', exc_info=True)
+        return None
+
+def load_fiche_recherche():
+    try:
+        fiche_recherche_data = FichierDeRecherche.query.all()
+        return fiche_recherche_data
+    except Exception as e:
+        # Handle exceptions if necessary
+        logging.error(f'Error loading fiche_recherche: {e}', exc_info=True)
+        return None
+    
+def load_police_terrain():
+    try:
+        pt_data = PoliceTerrain.query.all()
+        return pt_data
+    except Exception as e:
+        # Handle exceptions if necessary
+        logging.error(f'Error loading fiche_recherche: {e}', exc_info=True)
         return None
 
 ######################################################################
@@ -150,6 +177,33 @@ def uploadvideo():
     requests.get(dl_location_endpoint)
     return redirect(dl_location_endpoint)
 
+######################################################################
+#               
+#                   CRUD FOR FIELD COP
+#
+######################################################################
+
+@app.route('/cop-list')
+def coplist():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        cop = PoliceTerrain.query.all()
+
+        if cop or user:
+            return render_template('list-terraincop.html', cop=cop)
+    
+    return render_template('index.html')
+
+@app.route('/cop-list/<int:officer_id>', methods=['GET'])
+def officer_history(officer_id):
+    cop = PoliceTerrain.query.get(officer_id)
+    if cop:
+        history = cop.location_history
+        return render_template('historic-terraincop.html', cop=cop, history=history)
+    else:
+        # Handle if officer ID doesn't exist
+        return render_template('index.html')
 
 ######################################################################
 #               
@@ -249,8 +303,6 @@ def editfiche(fichier_id):
         return redirect(url_for('ficheliste'))
 
     return render_template('edit-fiche.html', fichier=fichier)
-
-
 ######################################################################
 #               
 #                   CRUD FOR VEHICLES
@@ -262,7 +314,7 @@ def vehiculeliste():
     if 'user_id' in session:
         user_id = session['user_id']
         user = User.query.filter_by(id=user_id).first()
-        vehicles = Vehicle.query.all()
+        vehicles = load_vehicles()
 
         if vehicles or user:
             return render_template('liste-vehicules.html', vehicles=vehicles)
@@ -298,6 +350,7 @@ def get_updated_vehicles():
         # Prepare the vehicle data to be sent in JSON format
         vehicle_data = [
             {
+                'type': vehicle.model,
                 'car_plate': vehicle.car_plate,
                 'Status': vehicle.Status,
                 'index': vehicle.id  # Using vehicle id as an index (you can adjust this)

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+    <!-- Include Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="flex flex-col w-full min-h-screen bg-black text-white">
+        {% include 'header.html' %}
+
+        <main class="flex-1 overflow-y-auto p-4 space-y-8">
+          <div class="grid gap-4 lg:grid-cols-3"></div>
+          <div class="grid gap-4 lg:grid-cols-2 justify-items-end mx-0">
+            <div
+              class="rounded-lg border shadow-sm col-span-2 lg:col-span-2 bg-white text-black mx-auto w-full lg:w-full xl:w-full"
+              data-v0-t="card"
+            >
+              <div class="flex-col space-y-1.5 p-6 pb-2 flex justify-between items-center">
+                <h3 class="tracking-tight text-lg font-medium text-left">FieldCop List</h3>
+                <a href="/cop-list" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-gray-500 text-white rounded-md px-2 py-1 ml-auto">
+                  Go Back
+                </a>
+              </div>
+              
+              <div class="p-6">
+                <div class="relative w-full overflow-auto">
+                  <table class="w-full caption-bottom text-sm">
+                    <thead class="[&amp;_tr]:border-b">
+                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Localisation
+                        </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Time & Date
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="[&amp;_tr:last-child]:border-0">
+                      {% for entry in history %}
+                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ entry.street_name }}</td>
+                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ entry.recorded_at }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+          </div>
+          <div class="grid gap-4 lg:grid-cols-2"></div>
+        </main>
+        {% include 'footer.html' %}
+
+      </div>
+</body>
+
+</html>

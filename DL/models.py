@@ -7,13 +7,11 @@ from datetime import datetime
 from sqlalchemy import DateTime
 
 
-class Progress(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    current_progress = db.Column(db.Integer, default=0)
-
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
     email = db.Column(db.String)
     password = db.Column(db.String)
     type = db.Column(db.String)
@@ -27,10 +25,10 @@ class User(db.Model):
         self.email = email
         self.password = password
 
-class PoliceTonSite(User):
+class PoliceTerrain(User):
     __tablename__ = 'police_ton_sites'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    site_code = db.Column(db.String)
+    badge_number = db.Column(db.String)
 
     location_history = db.relationship("LocationHistory", back_populates="police_ton_site")
 
@@ -38,22 +36,26 @@ class PoliceTonSite(User):
         'polymorphic_identity': 'police_ton_site',
     }
 
-    def __init__(self, email, password, site_code):
+    def __init__(self, email, password, badge_number, first_name=None, last_name=None):
         super().__init__(email, password)
-        self.site_code = site_code
+        self.badge_number = badge_number
+        self.first_name = first_name
+        self.last_name = last_name
 
 class PoliceBrigader(User):
     __tablename__ = 'police_brigaders'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    badge_number = db.Column(db.Integer)
+    badge_number = db.Column(db.String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'police_brigader',
     }
 
-    def __init__(self, email, password, badge_number):
+    def __init__(self, email, password, badge_number, first_name=None, last_name=None):
         super().__init__(email, password)
         self.badge_number = badge_number
+        self.first_name = first_name
+        self.last_name = last_name
         
 class LocationHistory(db.Model):
     __tablename__ = 'location_history'
@@ -64,7 +66,7 @@ class LocationHistory(db.Model):
     street_name = db.Column(db.String)  # New column for street name
     recorded_at = db.Column(DateTime, default=datetime.utcnow)  # Column for recording time
 
-    police_ton_site = db.relationship("PoliceTonSite", back_populates="location_history")
+    police_ton_site = db.relationship("PoliceTerrain", back_populates="location_history")
 
     def __init__(self, police_ton_site_id, latitude, longitude, street_name, recorded_at):
         self.police_ton_site_id = police_ton_site_id
@@ -113,3 +115,8 @@ class FichierDeRecherche(db.Model):
 
     person = db.relationship("Person", back_populates="fichiers")
     vehicle = db.relationship("Vehicle", back_populates="fichiers")
+
+
+class Progress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    current_progress = db.Column(db.Integer, default=0)

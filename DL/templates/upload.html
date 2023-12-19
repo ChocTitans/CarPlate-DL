@@ -139,7 +139,7 @@ document.getElementById('detectButton').addEventListener('click', function() {
         .then(response => {
             // Handle the response from the server
             console.log(response);
-            progressInterval = setInterval(fetchProgress, 2000); // Fetch progress every 1 second (adjust interval as needed)
+            progressInterval = setInterval(fetchProgress, 1500); // Fetch progress every 1 second (adjust interval as needed)
 
         })
         .catch(error => {

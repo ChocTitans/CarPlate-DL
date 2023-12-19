@@ -15,19 +15,25 @@
           <div class="grid gap-4 lg:grid-cols-3">
             <div class="rounded-lg border shadow-sm col-span-1 bg-white text-black" data-v0-t="card">
               <div class="flex flex-col p-6 pb-2 space-y-0">
-                <h3 class="tracking-tight text-sm font-medium">Total des Personnes</h3>
+                  <h3 class="tracking-tight text-sm font-medium">Total des Personnes</h3>
               </div>
               <div class="p-6">
-                <div class="text-2xl font-bold">1,234</div>
-                <p class="text-xs text-green-400">+15% from last month</p>
+                  {% if percentage_change < 0 %}
+                  <div class="text-2xl font-bold">{{ total_persons }}</div>
+                  <p class="text-xs text-red-500">{{ percentage_change }}% from last month</p>
+                  {% else %}
+                  <div class="text-2xl font-bold">{{ total_persons }}</div>
+                  <p class="text-xs text-green-400">{{ percentage_change }}% from last month</p>
+                  {% endif %}
               </div>
-            </div>
+          </div>
+          
             <div class="rounded-lg border shadow-sm col-span-1 bg-white text-black" data-v0-t="card">
               <div class="flex flex-col p-6 pb-2 space-y-0">
                 <h3 class="tracking-tight text-sm font-medium">Total des Policiers</h3>
               </div>
               <div class="p-6">
-                <div class="text-2xl font-bold">567</div>
+                <div class="text-2xl font-bold">1</div>
                 <p class="text-xs text-green-400">+5% from last month</p>
               </div>
             </div>
@@ -36,8 +42,13 @@
                 <h3 class="tracking-tight text-sm font-medium">Cas Recherché</h3>
               </div>
               <div class="p-6">
-                <div class="text-2xl font-bold">123</div>
-                <p class="text-xs text-red-400">-20% from last month</p>
+                  {% if percentage_change < 0 %}
+                  <div class="text-2xl font-bold">{{ total_fiches }}</div>
+                  <p class="text-xs text-red-500">{{ percentage_change_fiches }}% from last month</p>
+                  {% else %}
+                  <div class="text-2xl font-bold">{{ total_fiches }}</div>
+                  <p class="text-xs text-green-400">{{ percentage_change_fiches }}% from last month</p>
+                  {% endif %}
               </div>
             </div>
           </div>
@@ -46,81 +57,93 @@
               <div class="flex flex-col space-y-1.5 p-6 pb-2">
                 <h3 class="tracking-tight text-sm font-medium">Ongoing Cases</h3>
               </div>
-              <div class="p-6">
-                <div class="relative w-full overflow-auto">
-                  <table class="w-full caption-bottom text-sm">
-                    <thead class="[&amp;_tr]:border-b">
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Fiche ID
-                        </th>
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Matricule
-                        </th>
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="[&amp;_tr:last-child]:border-0">
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">1</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">LA-AA58</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                          <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500">
-                            Recherché
-                          </div>
-                        </td>
-                      </tr>
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">2</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">AAZO-DSO</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                          <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
-                            Interpellé
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <div class="p-6">
+                  <div class="relative w-full overflow-auto">
+                      <table class="w-full caption-bottom text-sm">
+                          <thead class="[&amp;_tr]:border-b">
+                              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                      Fiche ID
+                                  </th>
+                                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                      Matricule
+                                  </th>
+                                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                      Status
+                                  </th>
+                              </tr>
+                          </thead>
+                          <tbody class="[&amp;_tr:last-child]:border-0">
+                              {% for fiche in fiches %}
+                              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fiche.id }}</td>
+                                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ fiche.vehicle_car_plate }}</td>
+                                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                                      {% if fiche.vehicle.Status == 'Recherche' %}
+                                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-500">
+                                          Recherché
+                                      </div>
+                                      {% else %}
+                                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500">
+                                          Interpellé
+                                      </div>
+                                      {% endif %}
+                                  </td>
+                                  <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                                    <a href="{{ url_for('car_historic', car_id=fiche.vehicle.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 text-white rounded-md px-2 py-1 ml-2" style="background-color: rgb(249 115 22);">
+                                        Check
+                                    </a>
+                                  </td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
               </div>
+            
             </div>
             <div class="rounded-lg border shadow-sm col-span-1 bg-white text-black" data-v0-t="card">
               <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                <h3 class="tracking-tight text-sm font-medium">Les Brigadiers</h3>
+                <h3 class="tracking-tight text-sm font-medium">Police Officers in the Field</h3>
               </div>
               <div class="p-6">
                 <div class="relative w-full overflow-auto">
-                  <table class="w-full caption-bottom text-sm">
-                    <thead class="[&amp;_tr]:border-b">
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Police ID
-                        </th>
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Numéro Badge
-                        </th>
-                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Location
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="[&amp;_tr:last-child]:border-0">
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">#1</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">AADDA-12</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">API GOOGLE</td>
-                      </tr>
-                      <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">#2</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0"> AADDX-22</td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">API GOOGLE</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                    <table class="w-full caption-bottom text-sm">
+                        <thead class="[&amp;_tr]:border-b">
+                            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                    Badge N
+                                </th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                    First Name
+                                </th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                    Last Name
+                                </th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                    Locations
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="[&amp;_tr:last-child]:border-0">
+                            {% for police in pt %}
+                            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ police.badge_number }}</td>
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ police.first_name }}</td>
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ police.last_name }}</td>
+                                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                                  <a href="{{ url_for('officer_history', officer_id=police.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 text-white rounded-md px-2 py-1 ml-2" style="background-color: rgb(249 115 22);">
+                                    check
+                                </a>
+                                
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-              </div>
+            </div>
+            
             </div>
           </div>
         </main>
