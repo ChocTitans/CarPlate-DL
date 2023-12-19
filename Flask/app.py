@@ -21,14 +21,12 @@ Session = sessionmaker(bind=engine)
 #                   ROUTING IN GENERAL
 #
 ######################################################################
+
 @app.route('/')
 def index():
     if 'user_id' in session:
-        # Fetch user details using session information
-        session_db = Session()
         user_id = session['user_id']
-        user = session_db.query(User).filter_by(id=user_id).first()
-        session_db.close()
+        user = User.query.filter_by(id=user_id).first()
         if user:
             return render_template('location.html')
     return render_template('index.html')

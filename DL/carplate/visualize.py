@@ -114,6 +114,5 @@ if __name__ == '__main__':
 
                 # cv2.imshow('frame', frame)
                 # cv2.waitKey(0)
-
         out.release()
         cap.release()

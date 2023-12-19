@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
-        total_frames = 10  # Assuming 10 frames as the limit
+        total_frames = 50  # Assuming 10 frames as the limit
         frame_count = 0  # Initialize the frame counter
         current_progress = 0
         frame_nmr = -1
@@ -83,7 +83,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score >= 0.5:
+                                if license_plate_text_score >= 0.55:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
@@ -101,10 +101,14 @@ if __name__ == '__main__':
 
         print("Executing the visualize scripts")
         # Execute the second script
-        subprocess.Popen(['python', './carplate/visualize.py', video_filename])
-        time.sleep(5)
+        process = subprocess.Popen(['python', './carplate/visualize.py', video_filename])
+
+        # Wait for the subprocess to complete
+        process.wait()
+        time.sleep(2)
         with app.app_context():
-           print("reseted")
+           current_progress = 100
+            time.sleep(3)
            reset_progress()
     else:
         print("Please provide the video filename as a command line argument")

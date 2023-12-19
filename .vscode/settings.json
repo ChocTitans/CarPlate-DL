@@ -1,0 +1,5 @@
+{
+    "discord.removeRemoteRepository": true,
+    "discord.removeDetails": true,
+    "discord.removeLowerDetails": true
+}

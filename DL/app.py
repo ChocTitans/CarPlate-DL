@@ -176,17 +176,20 @@ def save_license_plate(license_plate_text, user_id):
                 localisation = latest_location.street_name if latest_location else None
 
                 # Check if the license plate exists in FicherdeRecherche
-                existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
                 existing_vehicule = Vehicle.query.filter_by(car_plate=license_plate_text).first()
-                if existing_record:
-                    # Update the 'Status' attribute of the vehicle to 'Recherche'
-                    existing_vehicle = Vehicle.query.filter_by(car_plate=license_plate_text).first()
-                    if existing_vehicle:
-                        existing_vehicle.Status = "Recherche"
+                if existing_vehicule:
+                    existing_record = FichierDeRecherche.query.filter_by(vehicle_car_plate=license_plate_text).first()
+                    if existing_record:
+                        existing_vehicule.Status = "Recherche"
                         db.session.commit()
-                elif not existing_vehicule:
+                    else:
+                        historic_entry = HistoricVoiture(vehicle=existing_vehicule, localisation=localisation, recorded_at=recorded_at)
+                        db.session.add(historic_entry)
+                        db.session.commit()
+                        
+                else:
                     # Add the license plate if it doesn't exist
-                    new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="No Recherche")
+                    new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="Non Recherche")
                     db.session.add(new_vehicle)
                     db.session.commit()
 
