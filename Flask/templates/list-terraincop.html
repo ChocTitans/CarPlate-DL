@@ -21,6 +21,9 @@
             >
               <div class="flex-col space-y-1.5 p-6 pb-2 flex justify-between items-center">
                 <h3 class="tracking-tight text-lg font-medium text-left">Cop List</h3>
+                <a href="/add-cop" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-green-500 text-white rounded-md px-2 py-1 ml-auto">
+                    Add
+                  </a>
               </div>
               <div class="p-6">
                 <div class="relative w-full overflow-auto">
@@ -30,6 +33,9 @@
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                             Badge N
                         </th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                          Email
+                      </th>
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                             First Name
                         </th>
@@ -42,6 +48,7 @@
                         {% for cops in cop %}
                         <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.badge_number }}</td>
+                          <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.email }}</td>
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.first_name }}</td>
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.last_name }}</td>
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">

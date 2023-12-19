@@ -205,6 +205,42 @@ def officer_history(officer_id):
         # Handle if officer ID doesn't exist
         return render_template('index.html')
 
+@app.route('/add-cop')
+def addcop():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+
+        if user:
+            try:
+                return render_template('add-terraincop.html')
+            except Exception as e:
+                # Handle exceptions if necessary
+                logging.error(f'Error fetching data for add-fiche: {e}', exc_info=True)
+                return render_template('dashboard.html')
+    
+    return render_template('index.html')
+
+@app.route('/submit-cop-form', methods=['POST'])
+def submit_form_cop():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        badge_number = request.form['badge_number']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+
+        # Create a PoliceTerrain instance and add it to the database
+        new_police_terrain = PoliceTerrain(email=email, password=password, badge_number=badge_number, first_name=first_name, last_name=last_name)
+
+        db.session.add(new_police_terrain)
+        db.session.commit()
+
+        # Redirect or render a success page
+        return redirect(url_for('coplist'))
+
+    # Handle other cases or errors
+    return render_template('dashboard.html')  # You can replace 'error.html' with your error page
 ######################################################################
 #               
 #                   CRUD FOR FICHE DE RECHERCHE
