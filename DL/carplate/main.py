@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
-        total_frames = 50  # Assuming 10 frames as the limit
+        total_frames = 200  # Assuming 10 frames as the limit
         frame_count = 0  # Initialize the frame counter
         current_progress = 0
         frame_nmr = -1
@@ -62,7 +62,6 @@ if __name__ == '__main__':
 
                 # track vehicles
                 track_ids = mot_tracker.update(np.asarray(detections_))
-
                 # detect license plates
                 license_plates = license_plate_detector(frame)[0]
                 for license_plate in license_plates.boxes.data.tolist():
@@ -77,13 +76,13 @@ if __name__ == '__main__':
 
                         # process license plate
                         license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
-                        _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_gray, 79, 255, cv2.THRESH_BINARY_INV)
+                        _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_gray, 67, 255, cv2.THRESH_BINARY_INV)
 
                         # read license plate number
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score > 0.6:
+                                if license_plate_text_score > 0.7:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
@@ -108,6 +107,7 @@ if __name__ == '__main__':
         time.sleep(2)
         with app.app_context():
             current_progress = 100
+            update_progress(current_progress)
             time.sleep(5)
             reset_progress()
     else:

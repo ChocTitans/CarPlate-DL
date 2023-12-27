@@ -187,18 +187,17 @@ def save_license_plate(license_plate_text, user_id):
                     else:
                         # Check if the vehicle already has a record in the same street area
                         existing_location = (
-                            LocationHistory.query
+                            HistoricVoiture.query
                             .filter_by(
-                                police_ton_site_id=police_ton_site.id,
-                                street_name=localisation  # Assuming street_name is the street area field
+                                vehicle=existing_vehicule,
+                                localisation=localisation  # Assuming street_name is the street area field
                             )
                             .first()
                         )
+                        print(existing_location)
                         if existing_location:
                             # Print the vehicle's existing location for comparison
-                            print(f"Existing location: {existing_location.street_name}")
-                            print(f"Localisation variable: {localisation}")
-
+                            print("no")
                         if not existing_location:
                             # Add the location history for the vehicle
                             historic_entry = HistoricVoiture(vehicle=existing_vehicule, localisation=localisation, recorded_at=recorded_at)
@@ -234,7 +233,7 @@ def video():
 #
 ######################################################################
 
-@app.route('/reset_progress', methods=['POST'])
+@app.route('/reset_progress')
 def reset_progress():
     progress_entry = Progress.query.first()
     if progress_entry:
