@@ -1,10 +1,6 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from config import db
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import DateTime
+from sqlalchemy import  Integer, String, ForeignKey, DateTime
+from config import db
 
 
 class User(db.Model):

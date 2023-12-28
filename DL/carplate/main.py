@@ -22,7 +22,9 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         video_filename = sys.argv[1]  # Get the video filename from command line argument
         user_id = sys.argv[2]  # Get user ID from command line argument
-
+        current_progress = 0
+        with app.app_context():  # Establish the app context
+            update_progress(current_progress)
         # Construct the video file path using the received filename
         video_path = f'./uploads/{video_filename}'
         cap = cv2.VideoCapture(video_path)
@@ -36,7 +38,7 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
-        total_frames = 200  # Assuming 10 frames as the limit
+        total_frames = 1000  # Assuming 10 frames as the limit
         frame_count = 0  # Initialize the frame counter
         current_progress = 0
         frame_nmr = -1
@@ -45,8 +47,6 @@ if __name__ == '__main__':
             frame_nmr += 1
             ret, frame = cap.read()
             if ret:
-                if frame_count >= total_frames:  # Check frame_count instead of frame_nmr
-                    break
                 results[frame_nmr] = {}
                 frame_count += 1
                 current_progress = int((frame_count / total_frames) * 100)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score > 0.7:
+                                if license_plate_text_score > 0.8:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
