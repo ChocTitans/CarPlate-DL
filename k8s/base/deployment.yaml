@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask
+  template:
+    spec:
+      containers:
+      - name: flask
+        image: "eltitans/flask:latest"
+        env:
+        - name: FLASK_APP
+          value: app
+        - name: FLASK_ENV
+          value: production
