@@ -8,4 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 80
 
-CMD ["python", "app.py"]
+ENV FLASK_APP=app
+ENV FLASK_ENV=production
+
+CMD ["flask", "run"]
