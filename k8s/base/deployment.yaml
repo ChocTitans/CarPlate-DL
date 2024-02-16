@@ -19,6 +19,6 @@ spec:
         image: "eltitans/flask:latest"
         env:
           - name: FLASK_APP
-            value: app
+            value: "app"
           - name: FLASK_ENV
-            value: production
+            value: "production"
