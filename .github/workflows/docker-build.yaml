@@ -25,6 +25,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./Flask
+          context: ${{ github.workspace }}/Flask
+          file: ${{ github.workspace }}/Flask/Dockerfile
           push: true
           tags: eltitans/flask:latest
