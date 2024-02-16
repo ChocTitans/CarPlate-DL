@@ -11,4 +11,4 @@ spec:
       port: 80
       targetPort: 80
   selector:
-    app.kubernetes.io/service: flask
+    app.kubernetes.io/name: flask

@@ -6,14 +6,19 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: flask
+      app.kubernetes.io/name: flask
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: flask
     spec:
       containers:
       - name: flask
+        ports:
+          - containerPort: 5000
         image: "eltitans/flask:latest"
         env:
-        - name: FLASK_APP
-          value: app
-        - name: FLASK_ENV
-          value: production
+          - name: FLASK_APP
+            value: app
+          - name: FLASK_ENV
+            value: production
