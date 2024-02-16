@@ -12,4 +12,4 @@ EXPOSE 80
 ENV FLASK_APP=app
 ENV FLASK_ENV=production
 
-CMD ["gunicorn", "-b", "0.0.0.0:80", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
