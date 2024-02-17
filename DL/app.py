@@ -183,7 +183,7 @@ def save_license_plate(license_plate_text, user_id):
                     
                     if existing_record:
                         existing_vehicule.Status = "Recherche"
-                        db.session.commit()
+                        #db.session.commit()
                     else:
                         # Check if the vehicle already has a record in the same street area
                         existing_location = (
@@ -201,19 +201,35 @@ def save_license_plate(license_plate_text, user_id):
                         if not existing_location:
                             # Add the location history for the vehicle
                             historic_entry = HistoricVoiture(vehicle=existing_vehicule, localisation=localisation, recorded_at=recorded_at)
-                            db.session.add(historic_entry)
-                            db.session.commit()
+                            #db.session.add(historic_entry)
+                            #db.session.commit()
 
                 else:
                     # Add the license plate if it doesn't exist
                     new_vehicle = Vehicle(car_plate=license_plate_text, model='Voiture', Status="Non Recherche")
-                    db.session.add(new_vehicle)
-                    db.session.commit()
+                    #db.session.add(new_vehicle)
+                    #db.session.commit()
 
                     historic_entry = HistoricVoiture(vehicle=new_vehicle, localisation=localisation, recorded_at=recorded_at)
-                    db.session.add(historic_entry)
-                    db.session.commit()
+                    #db.session.add(historic_entry)
+                    #db.session.commit()
+        api_data = {
+            'license_plate': license_plate_text,
+            'user_id': user_id,
+            'recorded_at': recorded_at.isoformat(),
+            'localisation': localisation,
+            'historic_entry': {
+                'id': historic_entry.id,
+                'vehicle_id': historic_entry.vehicle_id,
+                'localisation': historic_entry.localisation,
+                'recorded_at': historic_entry.recorded_at.isoformat()
+            } if historic_entry else None
+        }
 
+
+        # Send data to PB API
+        pb_api_url = 'http://localhost:5000/api/save_vehicle'  # Replace with your actual PB API endpoint
+        requests.post(pb_api_url, json=api_data)
 
 def video():
     if 'user_id' in session:

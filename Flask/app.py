@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, render_template, request, url_for, session, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import User, Vehicle, PoliceTerrain, PoliceBrigader, Person, LocationHistory, FichierDeRecherche, HistoricVoiture
@@ -153,6 +154,36 @@ def savelocation():
     requests.get(dl_location_endpoint)
     return redirect(dl_location_endpoint)
 
+@app.route('/api/save_vehicle', methods=['POST'])
+def save_vehicle():
+    data = request.json
+
+    if 'license_plate' not in data or 'user_id' not in data or 'recorded_at' not in data or 'localisation' not in data:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Create a new vehicle instance
+    new_vehicle = Vehicle(
+        car_plate=data['license_plate'],
+        model='Voiture',  # Set the model as required
+        Status='Non Recherche'  # Set the initial status as required
+    )
+
+    try:
+        # Add the vehicle to the database
+        db.session.add(new_vehicle)
+        db.session.commit()
+
+        # Optionally, you can also add historic entry if needed
+        recorded_at = datetime.fromisoformat(data['recorded_at'])
+        historic_entry = HistoricVoiture(vehicle=new_vehicle, localisation=data['localisation'], recorded_at=recorded_at)
+        db.session.add(historic_entry)
+        db.session.commit()
+
+        return jsonify({'message': 'Vehicle saved successfully'}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 @app.route('/location')
 def location():
     dl_app_url = 'http://localhost:5050'
@@ -319,6 +350,7 @@ def deletefiche(fichier_id):
             associated_vehicle.Status = "Non Recherche"  # Update Status to "Non Recherche"
             db.session.delete(fichier)
             db.session.commit()
+            
     return redirect(url_for('ficheliste'))
 
 
@@ -363,6 +395,7 @@ def deletevehicle(vehicle_id):
     if vehicle:
         db.session.delete(vehicle)
         db.session.commit()
+        
     return redirect(url_for('vehiculeliste'))
 
 
@@ -374,6 +407,7 @@ def car_historic(car_id):
         return render_template('historic-vehicules.html', historic_entries=historic_entries)
     # Handle case if the car ID doesn't exist
     return "Car ID not found"
+
 
 
 
@@ -393,7 +427,6 @@ def get_updated_vehicles():
             }
             for vehicle in vehicles
         ]
-
         return jsonify(vehicle_data)
     except Exception as e:
         # Log the exception for debugging

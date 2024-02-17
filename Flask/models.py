@@ -84,7 +84,7 @@ class Person(db.Model):
 class Vehicle(db.Model):
     __tablename__ = 'vehicles'
     id = db.Column(db.Integer, primary_key=True)
-    car_plate = db.Column(db.String)
+    car_plate = db.Column(db.String, unique=True)  # Add unique constraint
     model = db.Column(db.String)
     Status = db.Column(db.String)
 
@@ -94,11 +94,12 @@ class Vehicle(db.Model):
 class HistoricVoiture(db.Model):
     __tablename__ = 'historic_voitures'
     id = db.Column(Integer, primary_key=True)
-    vehicle_id = db.Column(String, ForeignKey('vehicles.id'))
-    recorded_at = db.Column(DateTime, default=datetime.utcnow)  # New column for recording time
+    vehicle_id = db.Column(Integer, ForeignKey('vehicles.id'))
+    recorded_at = db.Column(DateTime, default=datetime.utcnow)
     localisation = db.Column(String)
 
     vehicle = db.relationship("Vehicle", back_populates="historic_entries")
+
 
 class FichierDeRecherche(db.Model):
     __tablename__ = 'fichiers_de_recherche'
