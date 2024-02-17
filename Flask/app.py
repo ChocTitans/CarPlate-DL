@@ -178,6 +178,36 @@ def save_vehicle():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/save_location', methods=['POST'])
+def save_location_pb():
+    data = request.json
+    print(data)
+    police_ton_site_id = data.get('police_ton_site_id')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    street_name = data.get('street_name')
+    recorded_at = data.get('recorded_at')
+
+    try:
+
+        # Create a LocationHistoryPB entry
+        location_entry_pb = LocationHistory(
+            police_ton_site_id=police_ton_site_id,
+            latitude=latitude,
+            longitude=longitude,
+            street_name=street_name,
+            recorded_at=recorded_at
+        )
+
+        # Save the location entry to the PB database
+        db.session.add(location_entry_pb)
+        db.session.commit()
+        print("succes")
+
+        return jsonify({'message': 'Location saved successfully on PB'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 ######################################################################
 #               

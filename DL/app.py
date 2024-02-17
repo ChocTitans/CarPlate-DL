@@ -103,11 +103,19 @@ def save_location():
             police_ton_site_id = session.get('police_ton_site_id')
             
             if police_ton_site_id:
-                recorded_time = datetime.utcnow().replace(second=0, microsecond=0)  # Get current UTC time without seconds and microseconds
-                location_entry = LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
-                # Add and commit the entry using SQLAlchemy session
-                db.session.add(location_entry)
-                db.session.commit()
+                recorded_time = datetime.utcnow().replace(second=0, microsecond=0).isoformat()  # Get current UTC time without seconds and microseconds
+                LocationHistory(police_ton_site_id=police_ton_site_id, latitude=latitude, longitude=longitude, street_name=street_name, recorded_at=recorded_time)
+
+                location_data = {
+                    'police_ton_site_id': police_ton_site_id,
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'street_name': street_name,
+                    'recorded_at': recorded_time
+                }
+
+                pb_api_url = f'{API_URL}/api/save_location'
+                requests.post(pb_api_url, json=location_data, verify= False)
                 
                 return {'success': True}
             else:
