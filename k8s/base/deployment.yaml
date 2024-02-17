@@ -23,11 +23,4 @@ spec:
           - name: FLASK_ENV
             value: "production"
           - name: DATABASE_URL
-            value: "sqlite:///database.db"
-        volumeMounts:
-          - name: sqlite-storage
-            mountPath: /instance/database
-      volumes:
-        - name: sqlite-storage
-          persistentVolumeClaim:
-            claimName: sqlite-pvc
+            value: "postgresql://pfadb:serveurs..00@pfadb.postgres.database.azure.com:5432/postgres"
