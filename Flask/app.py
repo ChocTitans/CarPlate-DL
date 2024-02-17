@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 import requests
 import logging
 
+dl_app_url='https://flask.hamzaboubnane.tech'
 UPLOAD_FOLDER = 'uploads'
 people_data = None
 vehicles_data = None
@@ -145,14 +146,6 @@ def load_police_terrain():
 #                   API REDIRECTIONS TO PT SITE
 #
 ######################################################################
-    
-@app.route('/save-location')
-def savelocation():
-    dl_app_url = 'http://localhost:5050'
-    dl_location_endpoint = f'{dl_app_url}/save-location'
-
-    requests.get(dl_location_endpoint)
-    return redirect(dl_location_endpoint)
 
 @app.route('/api/save_vehicle', methods=['POST'])
 def save_vehicle():
@@ -184,29 +177,7 @@ def save_vehicle():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-@app.route('/location')
-def location():
-    dl_app_url = 'http://localhost:5050'
-    dl_location_endpoint = f'{dl_app_url}/location'
 
-    requests.get(dl_location_endpoint)
-    return redirect(dl_location_endpoint)
-
-@app.route('/run_detection')
-def rundetection():
-    dl_app_url = 'http://localhost:5050'
-    dl_location_endpoint = f'{dl_app_url}/run_detection'
-
-    requests.get(dl_location_endpoint)
-    return redirect(dl_location_endpoint)
-
-@app.route('/upload_video')
-def uploadvideo():
-    dl_app_url = 'http://localhost:5050'
-    dl_location_endpoint = f'{dl_app_url}/upload_video'
-
-    requests.get(dl_location_endpoint)
-    return redirect(dl_location_endpoint)
 
 ######################################################################
 #               

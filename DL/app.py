@@ -11,8 +11,10 @@ import json
 from sqlalchemy.orm import aliased
 from sqlalchemy import desc
 import requests
+import certifi
 import logging
 
+API_URL= 'https://flask.hamzaboubnane.tech'
 UPLOAD_FOLDER = 'uploads'
 people_data = None
 vehicles_data = None
@@ -228,8 +230,8 @@ def save_license_plate(license_plate_text, user_id):
 
 
         # Send data to PB API
-        pb_api_url = 'http://localhost:5000/api/save_vehicle'  # Replace with your actual PB API endpoint
-        requests.post(pb_api_url, json=api_data)
+        pb_api_url = f'{API_URL}/api/save_vehicle'
+        requests.post(pb_api_url, json=api_data, verify=False)
 
 def video():
     if 'user_id' in session:
@@ -279,11 +281,12 @@ def get_progress():
 
 @app.route('/api/updated_vehicles', methods=['GET'])
 def updated_vehicles():
-    dl_app_url = 'http://localhost:5000'
-    dl_updated_vehicles_endpoint = f'{dl_app_url}/api/vehicles'
+
+    dl_updated_vehicles_endpoint = f'{API_URL}/api/vehicles'
 
     try:
-        response = requests.get(dl_updated_vehicles_endpoint)
+        response = requests.get(dl_updated_vehicles_endpoint, verify=False)
+
         if response.status_code == 200:
             return jsonify(response.json())
         else:
