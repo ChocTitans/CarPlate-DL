@@ -11,6 +11,6 @@ EXPOSE 80
 
 ENV FLASK_APP=app
 ENV FLASK_ENV=production
-ENV DATABASE_URL=sqlite:///database.db
+ENV DATABASE_URL=postgresql://pfadb:serveurs..00@pfadb.postgres.database.azure.com:5432/postgres
 
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
