@@ -151,7 +151,7 @@ def load_police_terrain():
 def save_vehicle():
     data = request.json
 
-    if 'license_plate' not in data or 'user_id' not in data or 'recorded_at' not in data or 'localisation' not in data:
+    if 'license_plate' not in data or 'user_id' not in data or 'localisation' not in data or 'recorded_at' not in data:
         return jsonify({'error': 'Missing required fields'}), 400
 
     # Create a new vehicle instance
@@ -167,7 +167,9 @@ def save_vehicle():
         db.session.commit()
 
         # Optionally, you can also add historic entry if needed
-        recorded_at = datetime.fromisoformat(data['recorded_at'])
+        recorded_at_isoformat = data['recorded_at']
+        recorded_at = datetime.fromisoformat(recorded_at_isoformat)
+
         historic_entry = HistoricVoiture(vehicle=new_vehicle, localisation=data['localisation'], recorded_at=recorded_at)
         db.session.add(historic_entry)
         db.session.commit()
@@ -177,7 +179,6 @@ def save_vehicle():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 @app.route('/api/save_location', methods=['POST'])
 def save_location_pb():
     data = request.json
@@ -202,7 +203,6 @@ def save_location_pb():
         # Save the location entry to the PB database
         db.session.add(location_entry_pb)
         db.session.commit()
-        print("succes")
 
         return jsonify({'message': 'Location saved successfully on PB'}), 201
     except Exception as e:
