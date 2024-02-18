@@ -3,86 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <title>FlaskApp</title>
-    <!-- Include Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-
+    <style>
+      /* Styles for the modals */
+      .modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 1000;
+          background: rgba(0, 0, 0, 0.5);
+      }
+  
+      .modal-content {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          width: 80%;
+          max-width: 400px;
+      }
+  
+      /* Styles for modal buttons */
+      .modal-buttons button {
+          margin-top: 10px;
+          padding: 8px 16px;
+          cursor: pointer;
+      }
+  
+      .modal-buttons button.submit {
+          background-color: #3490dc;
+          color: #fff;
+      }
+  
+      .modal-buttons button.close {
+          background-color: #ccc;
+          color: #000;
+      }
+  </style>
+  
 </head>
 
 <body>
     <div class="flex flex-col w-full min-h-screen bg-black text-white">
-      {% include 'header.html' %}
-
         <main class="flex-1 overflow-y-auto p-4 space-y-8">
-          <div class="grid gap-4 lg:grid-cols-3"></div>
-          <div class="grid gap-4 lg:grid-cols-1 justify-items-center" id="osjm23pbyaa">
-            <div
-              class="rounded-lg border shadow-sm col-span-1 bg-white text-black w-full lg:w-2/3 mx-auto"
-              data-v0-t="card"
-            >
-              <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                <h3 class="tracking-tight text-sm font-medium">Nouvelle Fiche</h3>
-              </div>
-              <div class="p-6">
-                <form action="/submit-form" class="space-y-4" method="POST">
-                  <label class="block">
-                    <span class="text-gray-700">Nom Fiche</span>
-                    <input
-                      aria-label="Case ID"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                      type="text"
-                      placeholder="Nom de cette fiche"
-                      name="nom_fiche"
-                    />
-                  </label>
-                  <label class="block">
-                    <span class="text-gray-700">Person</span>
-                    <select id="selectPeople" name="selectedPerson" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
-                        {% for person in people %}
-                            <option value="{{ person.cin }}">{{ person.first_name }} {{ person.last_name }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                
-                <label class="block">
-                    <span class="text-gray-700">Vehicle</span>
-                    <select id="selectVehicles" name="selectedVehicle" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
-                        {% for vehicle in vehicles %}
-                            <option value="{{ vehicle.car_plate }}">{{ vehicle.model }} - {{ vehicle.car_plate }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                  <label class="block">
-                    <span class="text-gray-700">Address</span>
-                    <input
-                      aria-label="Address"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                      type="text"
-                      placeholder="Adresse dernière fois vu"
-                      name="address"
-                    />
-                  </label>
-                  <label class="block">
-                    <span class="text-gray-700">Description</span>
-                    <textarea
-                      aria-label="Description"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                      placeholder="Description de ce qui s'est passé"
-                      name="description"
-
-                    ></textarea>
-                  </label>
-                  <button class="w-full bg-blue-500 text-white rounded-md px-4 py-2" type="submit">
-                    Submit
-                  </button>
-                </form>
-              </div>
+            <div class="grid gap-4 lg:grid-cols-3"></div>
+            <div class="grid gap-4 lg:grid-cols-1 justify-items-center" id="osjm23pbyaa">
+                <div
+                    class="rounded-lg border shadow-sm col-span-1 bg-white text-black w-full lg:w-2/3 mx-auto"
+                    data-v0-t="card"
+                >
+                    <div class="flex flex-col space-y-1.5 p-6 pb-2">
+                        <h3 class="tracking-tight text-sm font-medium">New Search Warranty</h3>
+                    </div>
+                    <div class="p-6">
+                        <form action="/submit-form" class="space-y-4" method="POST">
+                            <label class="block">
+                                <span class="text-gray-700">Search Warranty Name</span>
+                                <input
+                                    aria-label="Case ID"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    type="text"
+                                    placeholder="Name of the search warranty"
+                                    name="nom_fiche"
+                                />
+                            </label>
+                            <label class="block">
+                                <span class="text-gray-700">Person</span>
+                                <div class="relative flex items-center mt-1">
+                                    <select id="selectPeople"
+                                            name="selectedPerson"
+                                            class="js-example-basic-single flex-1 rounded-md border-gray-300 shadow-sm"
+                                            style="width: 100%;">
+                                        {% for person in people %}
+                                            <option value="{{ person.cin }}">{{ person.first_name }} {{ person.last_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="ml-2 bg-blue-500 text-white rounded-md px-3 py-1 cursor-pointer" onclick="showModal('addPersonModal')">Add Person</button>
+                                </div>
+                            </label>
+                            <label class="block">
+                                <span class="text-gray-700">Vehicle</span>
+                                <div class="relative flex items-center mt-1">
+                                    <select id="selectVehicles"
+                                            name="selectedVehicle"
+                                            class="js-example-basic-single flex-1 rounded-md border-gray-300 shadow-sm"
+                                            style="width: 100%;">
+                                        {% for vehicle in vehicles %}
+                                            <option value="{{ vehicle.car_plate }}">{{ vehicle.model }} - {{ vehicle.car_plate }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="ml-2 bg-blue-500 text-white rounded-md px-3 py-1 cursor-pointer" onclick="showModal('addVehicleModal')">Add Vehicle</button>
+                                </div>
+                            </label>
+                            <label class="block">
+                                <span class="text-gray-700">Address</span>
+                                <input
+                                    aria-label="Address"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    type="text"
+                                    placeholder="Last time seen"
+                                    name="address"
+                                />
+                            </label>
+                            <label class="block">
+                                <span class="text-gray-700">Description</span>
+                                <textarea
+                                    aria-label="Description"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    placeholder="Description of what happened"
+                                    name="description"
+                                ></textarea>
+                            </label>
+                            <button class="w-full bg-blue-500 text-white rounded-md px-4 py-2" type="submit">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="grid gap-4 lg:grid-cols-2"></div>
+            <div class="grid gap-4 lg:grid-cols-2"></div>
         </main>
-        {% include 'footer.html' %}
 
+        <div id="addPersonModal" class="modal">
+          <div class="modal-content">
+              <!-- Modal content for adding a person -->
+              <form action="/add-person-popup" class="space-y-4" method="POST">
+                  <label class="block">
+                      <span class="text-gray-700">First Name</span>
+                      <input
+                          aria-label="First Name"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                          type="text"
+                          placeholder="Enter first name"
+                          name="person_first_name"
+                      />
+                  </label>
+                  <label class="block">
+                      <span class="text-gray-700">Last Name</span>
+                      <input
+                          aria-label="Last Name"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                          type="text"
+                          placeholder="Enter last name"
+                          name="person_last_name"
+                      />
+                  </label>
+                  <label class="block">
+                    <span class="text-gray-700">CIN</span>
+                    <input
+                        aria-label="CIN"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                        type="text"
+                        placeholder="Enter CIN"
+                        name="person_cin"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-gray-700">Date of Birth</span>
+                    <input
+                        aria-label="Date of Birth"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black" 
+                        type="date"
+                        name="person_dob"
+                    />
+                  </label>
+                  <label class="block">
+                      <span class="text-gray-700">Address</span>
+                      <input
+                          aria-label="Address"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                          type="text"
+                          placeholder="Enter address"
+                          name="person_address"
+                      />
+                  </label>
+      
+                  <div class="modal-buttons">
+                      <button class="submit rounded-md" type="submit" onclick="hideModal('addPersonModal')">Submit</button>
+                      <button class="close rounded-md" type="button" onclick="hideModal('addPersonModal')">Close</button>
+                  </div>
+              </form>
+          </div>
       </div>
-    </body>
+      
+        
 
+<!-- Add Vehicle Modal -->
+<div id="addVehicleModal" class="modal">
+  <div class="modal-content">
+      <!-- Modal content for adding a vehicle -->
+      <form action="/add-vehicle-popup" method="POST">
+          <label class="block mb-4">
+              <span class="text-gray-700">Car Plate</span>
+              <input
+                  aria-label="Car Plate"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                  type="text"
+                  placeholder="Enter car plate"
+                  name="car_plate"
+                  required
+              />
+          </label>
+
+          <label class="block mb-4">
+              <span class="text-gray-700">Model</span>
+              <input
+                  aria-label="Model"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-black"
+                  type="text"
+                  placeholder="Enter model"
+                  name="model"
+                  required
+              />
+          </label>
+          
+          <div class="modal-buttons">
+              <button class="submit rounded-md" type="submit" onclick="hideModal('addVehicleModal')">Submit</button>
+              <button class="close rounded-md" type="button" onclick="hideModal('addVehicleModal')">Close</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+
+        <script>
+            function showModal(modalId) {
+                document.getElementById(modalId).style.display = 'block';
+            }
+
+            function hideModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        </script>
+    </div>
+</body>
 </html>

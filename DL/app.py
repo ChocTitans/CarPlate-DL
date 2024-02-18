@@ -196,7 +196,7 @@ def save_license_plate(license_plate_text, user_id):
                         pb_api_url = f'{API_URL}/api/update_vehicle_status'
                         vehicle_update_data = {
                             'vehicle_id': existing_vehicule.id,
-                            'status': 'Recherche'
+                            'Status': 'Recherche'
                         }
                         requests.post(pb_api_url, json=vehicle_update_data, verify=False)
                     else:

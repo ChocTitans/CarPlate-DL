@@ -20,12 +20,12 @@
               data-v0-t="card"
             >
               <div class="flex flex-col space-y-1.5 p-6 pb-2">
-                <h3 class="tracking-tight text-sm font-medium">Modifier Fiche</h3>
+                <h3 class="tracking-tight text-sm font-medium">Edit Search Warranty</h3>
               </div>
               <div class="p-6">
                 <form action="{{ url_for('editfiche', fichier_id=fichier.id) }}" class="space-y-4" method="POST">
                   <label class="block">
-                    <span class="text-gray-700">Nom Fiche</span>
+                    <span class="text-gray-700">Search Warranty Name</span>
                     <input
                       aria-label="Case ID"
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
@@ -38,14 +38,18 @@
                   <label class="block">
                     <span class="text-gray-700">Person</span>
                     <select id="selectPeople" name="selectedPerson" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
-                        <option value="{{ fichier.person_cin }}">{{ fichier.person_cin }}</option>
+                        {% for person in all_people %}
+                            <option value="{{ person.cin }}">{{ person.first_name }} {{ person.last_name }}</option>
+                        {% endfor %}
                     </select>
                 </label>
                 
                 <label class="block">
                     <span class="text-gray-700">Vehicle</span>
                     <select id="selectVehicles" name="selectedVehicle" class="js-example-basic-single mt-1 block w-full rounded-md border-gray-300 shadow-sm" style="width: 100%;">
-                        <option value="{{ fichier.vehicle_car_plate }}">{{ fichier.vehicle_car_plate }}</option>
+                        {% for vehicle in all_vehicles %}
+                            <option value="{{ vehicle.car_plate }}">{{ vehicle.model }} - {{ vehicle.car_plate }}</option>
+                        {% endfor %}
                     </select>
                 </label>
                   <label class="block">
@@ -70,7 +74,7 @@
                     ></input>
                   </label>
                   <button class="w-full bg-blue-500 text-white rounded-md px-4 py-2" type="submit">
-                    Submit
+                    Edit
                   </button>
                 </form>
               </div>

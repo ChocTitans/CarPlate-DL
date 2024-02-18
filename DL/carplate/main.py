@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
-        total_frames = 60  # Assuming 10 frames as the limit
+        total_frames = 200  # Assuming 10 frames as the limit
         frame_count = 0  # Initialize the frame counter
         current_progress = 0
         frame_nmr = -1
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score > 0.5:
+                                if license_plate_text_score >= 0.65:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},

@@ -151,7 +151,7 @@ def load_police_terrain():
 def update_vehicle_status():
     data = request.json
     vehicle_id = data.get('vehicle_id')
-    new_status = data.get('new_status')
+    new_status = data.get('Status')
 
     vehicle = Vehicle.query.get(vehicle_id)
     if vehicle:
@@ -172,7 +172,7 @@ def save_vehicle():
     # Create a new vehicle instance
     new_vehicle = Vehicle(
         car_plate=data['license_plate'],
-        model='Voiture',  # Set the model as required
+        model='Car',  # Set the model as required
         Status='Non Recherche'  # Set the initial status as required
     )
 
@@ -232,6 +232,84 @@ def save_location_pb():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+######################################################################
+#               
+#                   CRUD FOR PERSON
+#
+######################################################################
+@app.route('/edit-person/<string:person_cin>', methods=['GET', 'POST'])
+def edit_person(person_cin):
+    person = Person.query.get(person_cin)
+
+    if request.method == 'POST':
+        person.first_name = request.form['first_name']
+        person.last_name = request.form['last_name']
+        person.dob = request.form['dob']
+        person.address = request.form['address']
+
+        db.session.commit()
+
+        return redirect(url_for('personlist'))  # Update with the correct route for your person list page
+
+    return render_template('edit-person.html', person=person)
+
+@app.route('/add-person', methods=['GET', 'POST'])
+def add_person():
+    if request.method == 'POST':
+        cin = request.form['cin']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        dob = request.form['dob']
+        address = request.form['address']
+
+        new_person = Person(cin=cin, first_name=first_name, last_name=last_name, dob=dob, address=address)
+        db.session.add(new_person)
+        db.session.commit()
+
+        return redirect(url_for('personlist'))  # Update with the correct route for your person list page
+
+    return render_template('add-person.html')
+
+@app.route('/add-person-popup', methods=['POST'])
+def add_person_popup():
+    if request.method == 'POST':
+        cin = request.form['person_cin']
+        first_name = request.form['person_first_name']
+        last_name = request.form['person_last_name']
+        dob = request.form['person_dob']
+        address = request.form['person_address']
+
+        new_person = Person(cin=cin, first_name=first_name, last_name=last_name, dob=dob, address=address)
+        db.session.add(new_person)
+        db.session.commit()
+
+        # You can add any additional logic here if needed
+
+    # For simplicity, you can just refresh the current page after submitting the form
+    return redirect(request.referrer or url_for('index'))  # Change 'index' to the actual route of your page
+
+# Delete Person
+@app.route('/delete-person/<string:person_cin>', methods=['GET','POST'])
+def delete_person(person_cin):
+    person = Person.query.get(person_cin)
+
+    if person:
+        db.session.delete(person)
+        db.session.commit()
+
+    return redirect(url_for('personlist'))  # Update with the correct route for your person list page
+
+@app.route('/person-list')
+def personlist():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        person = Person.query.all()
+
+        if person or user:
+            return render_template('personlist.html', person=person)
+    
+    return render_template('index.html')
 
 ######################################################################
 #               
@@ -401,8 +479,8 @@ def deletefiche(fichier_id):
         associated_vehicle = fichier.vehicle  # Retrieve associated vehicle
         if associated_vehicle:
             associated_vehicle.Status = "Non Recherche"  # Update Status to "Non Recherche"
-            db.session.delete(fichier)
-            db.session.commit()
+        db.session.delete(fichier)
+        db.session.commit()
             
     return redirect(url_for('ficheliste'))
 
@@ -411,6 +489,8 @@ def deletefiche(fichier_id):
 @app.route('/edit-fiche/<int:fichier_id>', methods=['GET', 'POST'])
 def editfiche(fichier_id):
     fichier = FichierDeRecherche.query.get(fichier_id)
+    all_people = Person.query.all()
+    all_vehicles = Vehicle.query.all()
 
     if request.method == 'POST':
         fichier.name = request.form['nom_fiche']
@@ -423,12 +503,29 @@ def editfiche(fichier_id):
 
         return redirect(url_for('ficheliste'))
 
-    return render_template('edit-fiche.html', fichier=fichier)
+    return render_template('edit-fiche.html', fichier=fichier, all_people=all_people, all_vehicles=all_vehicles)
+
 ######################################################################
 #               
 #                   CRUD FOR VEHICLES
 #
 ######################################################################
+
+@app.route('/add-vehicle-popup', methods=['POST'])
+def add_vehicle_popup():
+    if request.method == 'POST':
+        car_plate = request.form['car_plate']
+        model = request.form['model']
+
+        new_vehicle = Vehicle(car_plate=car_plate, model=model, Status='Recherche')
+        db.session.add(new_vehicle)
+        db.session.commit()
+
+        # You can add any additional logic here if needed
+
+    # For simplicity, you can just refresh the current page after submitting the form
+    return redirect(request.referrer or url_for('index'))  # Change 'index' to the actual route of your page
+
 
 @app.route('/vehicule-liste')
 def vehiculeliste():

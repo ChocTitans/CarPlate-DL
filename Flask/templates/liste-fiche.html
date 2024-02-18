@@ -34,16 +34,16 @@
                           ID
                         </th>
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Nom du fiche
+                          Search Warranty Name
                         </th>
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                           Person CIN
                         </th>
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Matricule
+                          Car Plate
                         </th>
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                          Addresse
+                          Address
                         </th>             
                         <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                           Description
@@ -67,12 +67,6 @@
                             <a href="{{ url_for('deletefiche', fichier_id=fichier.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-red-500 text-white rounded-md px-2 py-1 ml-2">
                             Delete
                             </a>
-                            <button
-                            class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 text-white rounded-md px-2 py-1 ml-2" style="background-color: rgb(249 115 22);"
-                            id="tcb86m1tno"
-                          >
-                            Archive
-                          </button>
                         </td>
                       </tr>
                       {% endfor %}
