@@ -52,7 +52,10 @@
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.first_name }}</td>
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{{ cops.last_name }}</td>
                           <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                            <a href="#" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-red-500 text-white rounded-md px-2 py-1 ml-2">
+                            <a href="{{ url_for('edit_cop', officer_id=cops.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-blue-500 text-white rounded-md px-2 py-1">
+                              Edit
+                            </a>
+                            <a href="{{ url_for('delete_cop', officer_id=cops.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-red-500 text-white rounded-md px-2 py-1 ml-2">
                               Delete
                             </a>
                             <a href="{{ url_for('officer_history', officer_id=cops.id) }}" class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 text-white rounded-md px-2 py-1 ml-2" style="background-color: rgb(249 115 22);">

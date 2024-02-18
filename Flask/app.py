@@ -147,11 +147,26 @@ def load_police_terrain():
 #
 ######################################################################
 
+@app.route('/api/update_vehicle_status', methods=['POST'])
+def update_vehicle_status():
+    data = request.json
+    vehicle_id = data.get('vehicle_id')
+    new_status = data.get('new_status')
+
+    vehicle = Vehicle.query.get(vehicle_id)
+    if vehicle:
+        vehicle.Status = new_status
+        db.session.commit()
+        return jsonify({'message': 'Vehicle status updated successfully'}), 201
+    else:
+        return jsonify({'error': 'Vehicle not found'}), 404 
+
+
 @app.route('/api/save_vehicle', methods=['POST'])
 def save_vehicle():
     data = request.json
 
-    if 'license_plate' not in data or 'user_id' not in data or 'localisation' not in data or 'recorded_at' not in data:
+    if 'license_plate' not in data or 'user_id' not in data:
         return jsonify({'error': 'Missing required fields'}), 400
 
     # Create a new vehicle instance
@@ -161,24 +176,33 @@ def save_vehicle():
         Status='Non Recherche'  # Set the initial status as required
     )
 
-    try:
-        # Add the vehicle to the database
-        db.session.add(new_vehicle)
-        db.session.commit()
+    # Add the vehicle to the database
+    db.session.add(new_vehicle)
+    db.session.commit()
+    print(new_vehicle.id)
+    return jsonify({'message': 'Vehicle saved successfully', 'vehicle_id': new_vehicle.id}), 201
 
-        # Optionally, you can also add historic entry if needed
-        recorded_at_isoformat = data['recorded_at']
-        recorded_at = datetime.fromisoformat(recorded_at_isoformat)
+    
+@app.route('/api/save_vehicle_localisation', methods=['POST'])
+def save_vehicle_localisation():
+    data = request.json
 
-        historic_entry = HistoricVoiture(vehicle=new_vehicle, localisation=data['localisation'], recorded_at=recorded_at)
-        db.session.add(historic_entry)
-        db.session.commit()
+    # Retrieve data from the JSON payload
+    vehicle_id = data.get('vehicle_id')
+    localisation = data.get('localisation')
+    recorded_at = data.get('recorded_at')
 
-        return jsonify({'message': 'Vehicle saved successfully'}), 201
+    # Create a new HistoricVoiture entry
+    new_localisation = HistoricVoiture(vehicle_id=vehicle_id, localisation=localisation, recorded_at=recorded_at)
+    
+    # Add and commit to the database
+    db.session.add(new_localisation)
+    db.session.commit()
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    # Send a response back to the client
+    response_data = {'message': 'Vehicle localisation saved successfully'}
+    return jsonify(response_data), 201
+    
 @app.route('/api/save_location', methods=['POST'])
 def save_location_pb():
     data = request.json
@@ -226,6 +250,34 @@ def coplist():
             return render_template('list-terraincop.html', cop=cop)
     
     return render_template('index.html')
+
+@app.route('/delete-cop/<int:officer_id>', methods=['GET', 'POST'])
+def delete_cop(officer_id):
+    cop = PoliceTerrain.query.get(officer_id)
+
+    if cop:
+        db.session.delete(cop)
+        db.session.commit()
+
+    return redirect(url_for('coplist'))
+
+@app.route('/edit-cop/<int:officer_id>', methods=['GET', 'POST'])
+def edit_cop(officer_id):
+    cop = PoliceTerrain.query.get(officer_id)
+
+    if request.method == 'POST':
+        cop.first_name = request.form['first_name']
+        cop.last_name = request.form['last_name']
+        cop.last_name = request.form['last_name']
+        cop.email = request.form['email']
+        cop.password = request.form['password']
+        cop.badge_number = request.form['badge_number']
+
+        db.session.commit()
+
+        return redirect(url_for('coplist'))
+
+    return render_template('edit-terraincop.html', cops=cop)
 
 @app.route('/cop-list/<int:officer_id>', methods=['GET'])
 def officer_history(officer_id):
