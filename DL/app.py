@@ -13,8 +13,9 @@ from sqlalchemy import desc
 import requests
 import certifi
 import logging
+from flask import send_file
 
-API_URL= 'http://localhost:5000'
+API_URL= 'https://flask.hamzaboubnane.tech'
 UPLOAD_FOLDER = 'uploads'
 people_data = None
 vehicles_data = None
@@ -124,7 +125,7 @@ def save_location():
             return {'success': False}
     else:
         return {'success': False}
-    
+
 
 @app.route('/run_detection', methods=['POST'])
 def run_detection():
@@ -133,6 +134,7 @@ def run_detection():
         
         # Assuming user_id is available in the session
         user_id = session.get('user_id')
+        update_progress(0)
         if user_id:
             subprocess.Popen(['python', './carplate/main.py', video_filename, str(user_id)])
             return 'Detection process started!'
@@ -140,6 +142,7 @@ def run_detection():
             return 'User ID not found in session'
     else:
         return 'Method Not Allowed'
+
 
 @app.route('/upload_video', methods=['GET', 'POST'])
 def upload_video():

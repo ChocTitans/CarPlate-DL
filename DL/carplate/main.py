@@ -22,9 +22,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         video_filename = sys.argv[1]  # Get the video filename from command line argument
         user_id = sys.argv[2]  # Get user ID from command line argument
-        current_progress = 0
-        with app.app_context():  # Establish the app context
-            update_progress(current_progress)
         # Construct the video file path using the received filename
         video_path = f'./uploads/{video_filename}'
         cap = cv2.VideoCapture(video_path)
@@ -111,7 +108,6 @@ if __name__ == '__main__':
             current_progress = 100
             update_progress(current_progress)
             time.sleep(5)
-            reset_progress()
     else:
         print("Please provide the video filename as a command line argument")
     
