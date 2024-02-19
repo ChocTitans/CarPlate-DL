@@ -43,16 +43,10 @@ def login():
         user = User.query.filter_by(email=email, password=password).first()
 
         if user:
-            if user.type == 'police_ton_site':
-                police_ton_site = PoliceTerrain.query.filter_by(id=user.id).first()
-                if police_ton_site:
-                    session['user_id'] = user.id
-                    session['police_ton_site_id'] = police_ton_site.id
-                    return redirect(url_for('location'))  # Redirect to the desired page after login
-            else:
+            if user.type == 'police_brigader':
                 session['user_id'] = user.id
                 return redirect(url_for('dashboard'))  # Redirect based on user type (if needed)
-        
+            
         return redirect(url_for('index'))  # Redirect if login fails
 
 
