@@ -1,5 +1,6 @@
 import string
 import easyocr
+import cv2
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=False)
@@ -82,6 +83,31 @@ def license_complies_format(text):
     else:
         return False
 
+def play_mp4(file_path):
+    cap = cv2.VideoCapture(file_path)
+
+    if not cap.isOpened():
+        print("Error: Couldn't open the video file.")
+        return
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+
+        if not ret:
+            print("Error: Couldn't read frame.")
+            break
+
+        # Resize the frame to your desired dimensions
+        frame = cv2.resize(frame, (800, 600))  # Adjust the dimensions as needed
+
+        cv2.imshow('MP4 Player', frame)
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+# Provide the path to your MP4 file
 
 def format_license(text):
     """

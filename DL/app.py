@@ -12,6 +12,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import desc
 import requests
 import certifi
+import cv2
 import logging
 from flask import send_file
 

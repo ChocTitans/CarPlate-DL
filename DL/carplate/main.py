@@ -8,7 +8,7 @@ from ultralytics import YOLO
 import subprocess
 import time
 from sort.sort import Sort
-from util import get_car, read_license_plate, write_csv
+from util import get_car, read_license_plate, write_csv, play_mp4
 from DL.config import app
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
@@ -35,8 +35,8 @@ if __name__ == '__main__':
 
         vehicles = [2, 3, 5, 7]
 
-        total_frames = 200  # Assuming 10 frames as the limit
-        frame_count = 0  # Initialize the frame counter
+        total_frames = 135
+        frame_count = 0 
         current_progress = 0
         frame_nmr = -1
         ret = True
@@ -81,7 +81,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score >= 0.65:
+                                if license_plate_text_score >= 0.75:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
@@ -99,6 +99,12 @@ if __name__ == '__main__':
 
         print("Executing the visualize scripts")
         # Execute the second script
+        with app.app_context():
+            current_progress = 100
+            update_progress(current_progress)
+            mp4_file_path = './carplate/video/outt.mp4'
+            play_mp4(mp4_file_path)
+
         process = subprocess.Popen(['python', './carplate/visualize.py', video_filename])
 
         # Wait for the subprocess to complete
@@ -107,7 +113,6 @@ if __name__ == '__main__':
         with app.app_context():
             current_progress = 100
             update_progress(current_progress)
-            time.sleep(5)
     else:
         print("Please provide the video filename as a command line argument")
     
