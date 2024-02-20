@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'feat/psql-cloud'
+      - 'final'
 
 jobs:
   docker:
