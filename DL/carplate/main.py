@@ -81,7 +81,7 @@ if __name__ == '__main__':
                         license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
                         if license_plate_text is not None:
                             with app.app_context():  # Establish the app context
-                                if license_plate_text_score >= 0.75:
+                                if license_plate_text_score >= 0.60:
                                     save_license_plate(license_plate_text, user_id)
 
                             results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
